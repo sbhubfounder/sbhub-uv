@@ -1,3 +1,4 @@
+```js
 import express from "express";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
@@ -19,11 +20,11 @@ app.use("/epoxy/", express.static(epoxyPath));
 app.use("/libcurl/", express.static(libcurlPath));
 app.use("/baremux/", express.static(baremuxPath));
 
-// Serve public folder (index.html, sw.js, etc)
+// Serve public folder
 app.use(express.static(join(root, "public")));
 
 // Fallback to index.html for client-side routing
-app.get("*", (req, res) => {
+app.get("/{*splat}", (req, res) => {
   res.sendFile(join(root, "public", "index.html"));
 });
 
@@ -39,3 +40,4 @@ server.on("upgrade", (request, socket, head) => {
 server.listen(port, () => {
   console.log(`SB HUB Ultraviolet proxy running at http://localhost:${port}`);
 });
+```
