@@ -5,7 +5,8 @@
   "description": "SB HUB with Ultraviolet proxy",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "mkdir -p public/uv && cp -r node_modules/@titaniumnetwork-dev/ultraviolet/dist/* public/uv/"
   },
   "keywords": [],
   "author": "",
