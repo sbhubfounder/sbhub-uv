@@ -1,7 +1,11 @@
+importScripts("/uv/uv.bundle.js");
+importScripts("/uv/uv.config.js");
 importScripts("/uv/uv.sw.js");
 
+const uv = new UVServiceWorker();
+
 self.addEventListener("fetch", async (event) => {
-  if (event.request.url.includes("/uv/service/")) {
+  if (uv.route(event)) {
     event.respondWith(uv.fetch(event));
   }
 });
