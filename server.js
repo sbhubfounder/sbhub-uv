@@ -14,21 +14,17 @@ const server = http.createServer(app);
 const root = fileURLToPath(new URL(".", import.meta.url));
 const port = process.env.PORT || 8080;
 
-// Serve Ultraviolet and transport files
 app.use("/uv/", express.static(uvPath));
 app.use("/epoxy/", express.static(epoxyPath));
 app.use("/libcurl/", express.static(libcurlPath));
 app.use("/baremux/", express.static(baremuxPath));
 
-// Serve public folder
 app.use(express.static(join(root, "public")));
 
-// Fallback to index.html for client-side routing
 app.get("/{*splat}", (req, res) => {
   res.sendFile(join(root, "public", "index.html"));
 });
 
-// Handle Wisp WebSocket upgrade for proxy
 server.on("upgrade", (request, socket, head) => {
   if (request.url?.endsWith("/wisp/")) {
     wisp.routeRequest(request, socket, head);
