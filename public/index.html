@@ -1554,6 +1554,12 @@ body {
 }
 .nt-clock {
   display: block;
+  width: 18.5rem;
+  max-width: 100%;
+  min-height: 1.6em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
   margin: 0.95rem 0 1.7rem;
   color: var(--clock-color, var(--accent-color));
   font-size: 1.15rem;
@@ -1564,6 +1570,10 @@ body {
   opacity: 0.9;
 }
 .searchbox { max-width: 43rem; }
+.nt-engine-row { display:flex; align-items:center; justify-content:center; width:min(43rem, 100%); margin:.7rem auto 0; }
+.nt-engine-row label { display:none; }
+.nt-engine-row select { max-width:12rem; min-width:10rem; padding:.4rem .75rem; border:1px solid var(--line-strong); border-radius:.55rem; background:var(--surface-color); color:var(--text-main); text-align:center; cursor:pointer; }
+
 .sx {
   height: 4.25rem;
   border-radius: 0.9rem;
@@ -1693,6 +1703,23 @@ body {
 }
 #app.collapsed .sb-discord .ico { width: 1.25rem; height: 1.25rem; }
 #app.collapsed #sbExpand { display: none; }
+#app.collapsed .sb-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.55rem 0.3rem 0.2rem;
+}
+#app.collapsed .cat-grid,
+#app.collapsed .sb-links,
+#app.collapsed .sb-tools {
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+#app.collapsed .sb-links { margin: 0.35rem 0; }
+#app.collapsed .sb-newtab { width: 3.7rem; margin: 0; }
+#app.collapsed .sb-tools { margin-top: 0.35rem; }
+#app.collapsed .sb-discord { width: 3.7rem; }
 
 @media (max-width: 720px) {
   #app, #app.collapsed { grid-template-columns: minmax(0, 1fr); }
@@ -1890,7 +1917,528 @@ body {
   }
 }
 
-  </style>
+  .web-view { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.web-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #fff; }
+.chat-page { padding: 1.2rem; max-width: 44rem; margin: 0 auto; height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.chat-lobby { display: flex; flex-direction: column; gap: 0.8rem; }
+.chat-note { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+.chat-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--text-muted); }
+.chat-field input, .chat-code, .chat-input { padding: 0.6rem 0.8rem; border-radius: 0.6rem; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-main); }
+.chat-join-row { display: flex; gap: 0.5rem; }
+.chat-join-row .chat-code { flex: 1; text-transform: uppercase; letter-spacing: 0.12em; }
+.chat-room { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0.7rem; }
+.chat-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.chat-actions { display: flex; gap: 0.5rem; }
+.chat-online { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+.chat-msgs { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; padding: 0.6rem; border: 1px solid var(--line); border-radius: 0.8rem; background: rgba(0, 0, 0, 0.25); }
+.chat-msg { line-height: 1.45; word-break: break-word; }
+.chat-sys { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+.chat-form { display: flex; gap: 0.5rem; }
+.chat-form .chat-input { flex: 1; }
+.tool-grid { grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+.tool-grid[hidden] { display: none; }
+.tool-panel { display: flex; flex-direction: column; gap: 1rem; }
+.tool-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.tool-head h3 { font-size: 1.1rem; }
+.tool-col { display: flex; flex-direction: column; gap: 0.8rem; max-width: 36rem; }
+.tool-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.95rem; color: var(--text-muted); }
+.tool-row .field, .tool-row select { flex: 1; min-width: 8rem; }
+.tool-out { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0.9rem; border-radius: 0.7rem; border: 1px solid var(--line); background: rgba(0,0,0,0.25); }
+.tool-out code { flex: 1; word-break: break-all; font-size: 0.95rem; }
+.wc-text { resize: vertical; padding: 0.7rem; border-radius: 0.7rem; }
+.wc-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.6rem; }
+.wc-stat { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.7rem; border-radius: 0.7rem; border: 1px solid var(--line); }
+.wc-stat span { font-size: 0.8rem; color: var(--text-muted); }
+.wc-stat strong { font-size: 1.1rem; }
+
+/* ---------- music app (Spotify-style shell) ---------- */
+.music-app {
+  display: grid;
+  grid-template-columns: 14.5rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--accent-color) 18%, transparent), transparent 55%),
+    #070b14;
+  color: var(--text-main);
+}
+.music-nav {
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem 0.85rem 1rem;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  background: rgba(4, 8, 16, 0.72);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
+  min-height: 0;
+}
+.music-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.65rem 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.music-nav-brand .ico { width: 1.35rem; height: 1.35rem; color: var(--accent-color); }
+.music-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 2.55rem;
+  padding: 0 0.85rem;
+  border-radius: 0.7rem;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.62);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.music-nav-btn .ico { width: 1.15rem; height: 1.15rem; flex: none; }
+.music-nav-btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.music-nav-btn.on {
+  color: #fff;
+  background: color-mix(in srgb, var(--accent-color) 22%, transparent);
+}
+.music-nav-label {
+  margin: 1.1rem 0.65rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+.music-nav-foot {
+  margin-top: auto;
+  padding: 0.75rem 0.5rem 0.25rem;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.4;
+}
+.music-nav-foot b { color: rgba(255,255,255,0.55); font-weight: 600; }
+
+.music-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.music-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.4rem 1.6rem 1.2rem;
+}
+.music-view { display: none; }
+.music-view.on { display: block; }
+
+.music-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.2rem;
+}
+.music-row { margin-bottom: 1.6rem; }
+.music-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+.music-row-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.music-row-head h3 .ico { width: 1rem; height: 1rem; color: var(--accent-color); }
+.music-row-scroll {
+  display: flex;
+  gap: 0.9rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scroll-snap-type: x mandatory;
+}
+.music-card {
+  flex: 0 0 9.6rem;
+  width: 9.6rem;
+  scroll-snap-align: start;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.music-card-art {
+  position: relative;
+  width: 9.6rem;
+  height: 9.6rem;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1a2338, #0c1220);
+  box-shadow: 0 0.5rem 1.4rem rgba(0,0,0,0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.music-card:hover .music-card-art {
+  transform: translateY(-0.2rem) scale(1.02);
+  box-shadow: 0 0.8rem 1.8rem rgba(0,0,0,0.45);
+}
+.music-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.music-card-play {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--accent-color) 40%, transparent);
+  pointer-events: none;
+}
+.music-card-play .ico { width: 1.05rem; height: 1.05rem; }
+.music-card:hover .music-card-play { opacity: 1; transform: translateY(0); }
+.music-card-title {
+  display: block;
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-card-artist {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-search-hero {
+  max-width: 36rem;
+  margin-bottom: 1.4rem;
+}
+.music-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 3.1rem;
+  padding: 0 1rem;
+  border-radius: 99rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: border-color 0.15s, background 0.15s;
+}
+.music-search-bar:focus-within {
+  border-color: color-mix(in srgb, var(--accent-color) 55%, transparent);
+  background: rgba(255,255,255,0.11);
+}
+.music-search-bar .ico { width: 1.15rem; height: 1.15rem; color: rgba(255,255,255,0.55); flex: none; }
+.music-search-bar input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.music-search-bar input::placeholder { color: rgba(255,255,255,0.4); }
+.music-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.6rem, 1fr));
+  gap: 1rem 0.9rem;
+}
+.music-results-empty {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.95rem;
+  padding: 2rem 0;
+}
+
+.music-listen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  background: #05070c;
+  z-index: 5;
+}
+.music-listen.on { display: flex; }
+.music-listen-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 2.8rem;
+  padding: 0 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(10, 14, 24, 0.95);
+  flex: none;
+}
+.music-listen-bar strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-listen-bar .muted { color: rgba(255,255,255,0.45); font-size: 0.8rem; margin-left: 0.35rem; font-weight: 500; }
+.music-listen-frame-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: #000;
+}
+.music-listen-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+}
+.music-listen-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #05070c;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 1.5rem;
+  z-index: 2;
+}
+.music-listen-status[hidden] { display: none; }
+
+.music-bar {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) auto minmax(10rem, 1fr);
+  align-items: center;
+  gap: 1rem;
+  height: 4.6rem;
+  padding: 0 1.1rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(8, 12, 22, 0.92);
+  backdrop-filter: blur(1.2rem);
+  -webkit-backdrop-filter: blur(1.2rem);
+  z-index: 8;
+}
+.music-bar-track {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.music-bar-art {
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 0.4rem;
+  background: #151b2b;
+  overflow: hidden;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.music-bar-art img { width: 100%; height: 100%; object-fit: cover; }
+.music-bar-art .ico { width: 1.2rem; height: 1.2rem; color: rgba(255,255,255,0.35); }
+.music-bar-meta { min-width: 0; }
+.music-bar-meta strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-bar-meta span {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-bar-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+.music-bar-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.music-bar-btns button {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.music-bar-btns button:hover { color: #fff; }
+.music-bar-btns .music-bar-play {
+  width: 2.55rem;
+  height: 2.55rem;
+  background: #fff;
+  color: #0a0f1a;
+}
+.music-bar-btns .music-bar-play:hover { transform: scale(1.05); }
+.music-bar-btns .ico { width: 1.05rem; height: 1.05rem; }
+.music-bar-hint {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+
+.music-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(22rem, 36vw);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.45);
+  font-variant-numeric: tabular-nums;
+}
+.music-progress input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 0.3rem;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+.music-card-art.loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: music-shimmer 1.2s linear infinite;
+}
+@keyframes music-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.music-card-art img.loaded { animation: music-fade-in 0.25s ease both; }
+@keyframes music-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.music-bar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.music-bar-right .pill-uv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.85rem;
+  padding: 0 0.7rem;
+  border-radius: 99rem;
+  background: color-mix(in srgb, var(--accent-color) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #fff;
+}
+.music-bar-right .pill-uv .ico { width: 0.8rem; height: 0.8rem; }
+
+.music-lib-list {
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+}
+.music-lib-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  color: rgba(255,255,255,0.78);
+  transition: background 0.12s;
+}
+.music-lib-list li:hover, .music-lib-list li.active {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+}
+.music-lib-list .n {
+  width: 1.5rem;
+  text-align: right;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  font-variant-numeric: tabular-nums;
+}
+.music-lib-list li.active .n { color: var(--accent-color); }
+.music-lib-list .t { flex: 1; font-weight: 600; font-size: 0.95rem; }
+
+@media (max-width: 720px) {
+  .music-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; }
+  .music-nav {
+    grid-row: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.65rem 0.7rem;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .music-nav-brand { padding: 0 0.4rem 0 0; font-size: 1rem; }
+  .music-nav-label, .music-nav-foot { display: none; }
+  .music-nav-btn { width: auto; height: 2.2rem; padding: 0 0.7rem; font-size: 0.85rem; }
+  .music-nav-btn span { display: none; }
+  .music-stage { grid-row: 2; }
+  .music-bar {
+    grid-column: 1;
+    grid-template-columns: 1fr auto;
+    height: auto;
+    padding: 0.65rem 0.8rem;
+  }
+  .music-bar-right { display: none; }
+  .music-card, .music-card-art { width: 8.2rem; flex-basis: 8.2rem; }
+  .music-card-art { height: 8.2rem; }
+}
+</style>
 <style>
 /* ---------- launch gate (countdown + early access) ---------- */
 #gate { position: fixed; inset: 0; z-index: 99999; background: #09090b; color: #ededf0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; font-family: "Inter", system-ui, sans-serif; }
@@ -1998,6 +2546,10 @@ body {
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
     <symbol id="i-forward" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
+    <symbol id="i-skip-back" viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></symbol>
+    <symbol id="i-skip-forward" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></symbol>
     <symbol id="i-reload" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
@@ -2106,9 +2658,11 @@ body {
         <span class="st-sep st-hide-sm"></span>
         <a class="st-item st-hide-sm" href="#" onclick="openExternal(CONFIG.discord);return false;"><svg class="ico"><use href="#i-chat"/></svg>Discord</a>
         <span class="st-sep st-hide-sm"></span>
-        <a class="st-item st-hide-sm" id="stTos" href="#">ToS</a>
-        <a class="st-item st-hide-sm" id="stPrivacy" href="#">Privacy</a>
-        <a class="st-item st-hide-sm" id="stDmca" href="#">DMCA</a>
+        <a class="st-item" id="stTos" href="#">ToS</a>
+        <a class="st-item" id="stPrivacy" href="#">Privacy</a>
+        <a class="st-item" id="stDmca" href="#">DMCA</a>
+        <span class="st-sep st-hide-sm"></span>
+        <span class="st-item st-hide-sm" id="stCredits">Made by Apex and Star</span>
       </div>
       <div class="st-group">
         <span class="st-item" id="stSecure"><svg class="ico"><use href="#i-shield"/></svg><span>Secure</span></span>
@@ -2235,6 +2789,10 @@ body {
                 <option value="Gmail">Gmail</option>
                 <option value="Canvas">Canvas</option>
                 <option value="Google Classroom">Google Classroom</option>
+                <option value="Google Slides">Google Slides</option>
+                <option value="Microsoft Teams">Microsoft Teams</option>
+                <option value="Zoom">Zoom</option>
+                <option value="Study Portal">Study Portal</option>
                 <option value="New Tab">New Tab</option>
               </select>
             </div>
@@ -2418,6 +2976,12 @@ const CDN_KEYS_URL = "https://cdn.jsdelivr.net/gh/sbhubfounder/sbsbsbsbsbsb@main
 const CDN_EXCLUSIVE_GAMES_URL = "https://cdn.jsdelivr.net/gh/sbhubfounder/sbsbsbsbsbsb@main/exclusive-games.json";
 const CDN_UPDATE_LOG_URL = "https://cdn.jsdelivr.net/gh/sbhubfounder/sbsbsbsbsbsb@main/updatelog.json";
 const PROXY_PREFIX = "/uv/service/";
+// The AI API must allow cross-origin requests (CORS) for file:// and other origins.
+const AI_API_URL = "https://sbhub-ai.onrender.com/api/chat";
+// UX guard only: enforce real rate limits on the API server too (per IP/user, not in HTML).
+const AI_MIN_INTERVAL_MS = 3000;
+const AI_MAX_MESSAGE_CHARS = 4000;
+let lastAiRequestAt = 0;
 const DEFAULT_CITY_BACKGROUND = "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2400&q=85";
 const BACKGROUND_PRESETS = [
   { name: "Neon city", accent: "#48a9ff", url: DEFAULT_CITY_BACKGROUND },
@@ -2500,7 +3064,7 @@ const CATEGORIES = {
   },
   ai: { label: "SB HUB AI", icon: "bot", kind: "ai" },
   music: {
-    label: "Music", icon: "music", kind: "links",
+    label: "Music", icon: "music", kind: "music",
     links: [
       ["Spotify", "https://open.spotify.com"], ["YouTube Music", "https://music.youtube.com"],
       ["SoundCloud", "https://soundcloud.com"], ["Apple Music", "https://music.apple.com"],
@@ -2516,22 +3080,8 @@ const CATEGORIES = {
       ["Crunchyroll", "https://www.crunchyroll.com"],
     ],
   },
-  chat: {
-    label: "Chat", icon: "bubble", kind: "links",
-    links: [
-      ["Discord", "https://discord.com/app"], ["WhatsApp Web", "https://web.whatsapp.com"],
-      ["Messenger", "https://www.messenger.com"], ["Telegram", "https://web.telegram.org"],
-      ["Slack", "https://slack.com"], ["Google Chat", "https://chat.google.com"],
-    ],
-  },
-  tools: {
-    label: "Tools", icon: "wrench", kind: "links",
-    links: [
-      ["Desmos Graphing", "https://www.desmos.com/calculator"], ["Desmos Scientific", "https://www.desmos.com/scientific"],
-      ["Google Translate", "https://translate.google.com"], ["Wolfram Alpha", "https://www.wolframalpha.com"],
-      ["Google Calendar", "https://calendar.google.com"], ["Speedtest", "https://www.speedtest.net"],
-    ],
-  },
+  chat: { label: "Chat", icon: "bubble", kind: "chat" },
+  tools: { label: "Tools", icon: "wrench", kind: "builtin" },
 };
 
 const QUICK_ROW = ["games", "ai", "music", "movies", "apps", "chat"];
@@ -2616,29 +3166,85 @@ async function prepareProxyTransport() {
   }
 }
 
+/* Adult content filter for everything opened through SB HUB (address bar, search, shortcuts, history). */
+const BLOCKED_HOST_SUFFIXES = [
+  "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", "redtube.com", "youporn.com",
+  "spankbang.com", "eporner.com", "chaturbate.com", "onlyfans.com", "brazzers.com",
+  "nhentai.net", "rule34.xxx", "tube8.com", "beeg.com", "motherless.com"
+];
+const BLOCKED_KEYWORDS = [
+  "porn", "xvideo", "xnxx", "xhamster", "redtube", "youporn", "hentai", "brazzers",
+  "onlyfans", "chaturbate", "rule34", "nhentai", "spankbang", "xxx"
+];
+function isBlockedContent(url) {
+  let host = "";
+  try { host = new URL(url).hostname.toLowerCase(); } catch { /* not a full URL */ }
+  const full = String(url).toLowerCase();
+  const domainHit = BLOCKED_HOST_SUFFIXES.some((d) => host === d || host.endsWith("." + d));
+  const keywordHit = BLOCKED_KEYWORDS.some((k) => full.includes(k));
+  return domainHit || keywordHit;
+}
+
 function openProxied(url) {
-  const encoded = proxyUrl(url);
-  if (!encoded) {
-    showToast("Proxy is unavailable. Open SB HUB from its deployed HTTPS address.");
+  if (isBlockedContent(url)) {
+    showToast("This site is blocked on SB HUB.");
     return false;
   }
-  const w = window.open("about:blank", "_blank");
-  if (!w) {
-    showToast("Popup blocked — allow popups for this page.");
+  const sandboxedOrigin = location.origin === "null";
+  const proxyRuntimeUnavailable = !window.isSecureContext || !("serviceWorker" in navigator);
+  if (location.protocol === "file:" || sandboxedOrigin || proxyRuntimeUnavailable) {
+    showToast("The proxy can't run here. Open SB HUB on its HTTPS Render address to browse through Ultraviolet.");
     return false;
   }
-  try { w.opener = null; } catch { /* cross-origin */ }
-  Promise.all([registerProxyServiceWorker(), prepareProxyTransport()])
+  go({ type: "web", url });
+  return true;
+}
+
+/* Renders a proxied page inside the browser's own tab area (address bar and tabs stay visible). */
+function buildWebView(tab, url) {
+  const label = hostOf(url) || "Web page";
+  tab.el.innerHTML = `
+    <div class="web-view">
+      <div class="game-load-status" role="status">Loading ${esc(label)} through Ultraviolet…</div>
+      <iframe class="web-frame" title="${esc(label)}" allow="autoplay; fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+    </div>`;
+  const frame = $(".web-frame", tab.el);
+  const status = $(".game-load-status", tab.el);
+  checkProxyAssets()
+    .then((missingAssets) => {
+      if (missingAssets.length) throw new Error(`Missing proxy files: ${missingAssets.join(", ")}`);
+      return Promise.all([registerProxyServiceWorker(), prepareProxyTransport()]);
+    })
     .then(([registered]) => {
-      if (!registered) throw new Error("The proxy service worker could not start.");
-      if (!w.closed) w.location.replace(encoded);
+      if (!registered) throw new Error("the proxy service worker could not start");
+      const encoded = proxyUrl(url);
+      if (!encoded) throw new Error("proxy config is missing");
+      if (!tab.el.contains(frame)) return; // tab was re-rendered or closed meanwhile
+      frame.src = new URL(encoded, location.href).href;
+      status.hidden = true;
     })
     .catch((error) => {
       console.error("SB HUB proxy setup failed:", error);
-      w.close();
-      showToast("Proxy could not connect. Please reload SB HUB and try again.");
+      status.textContent = `Proxy failed: ${error.message || "check server logs and UV/Wisp setup"}`;
     });
-  return true;
+}
+
+async function checkProxyAssets() {
+  // Use GET rather than HEAD: some static hosts reject HEAD, while SPA fallbacks
+  // can return index.html with status 200 for a missing JavaScript asset.
+  const paths = ["/sw.js", "/uv/uv.bundle.js", "/uv/uv.config.js", "/baremux/index.js", "/baremux/worker.js", "/epoxy/index.mjs"];
+  const results = await Promise.all(paths.map(async (path) => {
+    try {
+      const response = await fetch(path, { method: "GET", cache: "no-store", credentials: "same-origin" });
+      if (!response.ok) return `${path} (HTTP ${response.status})`;
+      const type = (response.headers.get("content-type") || "").toLowerCase();
+      if (type.includes("text/html")) return `${path} (server returned HTML instead of JavaScript)`;
+      return null;
+    } catch (error) {
+      return `${path} (unreachable${error && error.message ? `: ${error.message}` : ""})`;
+    }
+  }));
+  return results.filter(Boolean);
 }
 
 async function registerProxyServiceWorker() {
@@ -2662,7 +3268,7 @@ async function registerProxyServiceWorker() {
     return Boolean(navigator.serviceWorker.controller);
   } catch (error) {
     console.error("SB HUB proxy service worker registration failed:", error);
-    showToast("Proxy setup failed. Check that the deployed site includes the Ultraviolet files and /sw.js.");
+    showToast("Proxy setup failed: this HTTPS domain must serve a working /sw.js and proxy backend.");
     return false;
   }
 }
@@ -3164,7 +3770,7 @@ function renderBackgroundPresets() {
     button.className = "background-preset" + (index >= 5 ? " extra" : "") + (getBackground() === "custom" && current === preset.url ? " selected" : "");
     button.type = "button";
     button.title = `Use ${preset.name} background`;
-    button.innerHTML = `<img src="${index < 5 || expanded ? preset.url : ""}" alt="" loading="lazy"><span>${preset.name}</span>`;
+    button.innerHTML = `<img src="${index < 5 || expanded ? preset.url : ""}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'"><span>${preset.name}</span>`;
     button.onclick = () => selectBackgroundPreset(preset);
     grid.appendChild(button);
   });
@@ -3228,16 +3834,49 @@ function getCurrentParticleColors() {
   return (THEMES[key] || THEMES[DEFAULT_THEME]).particles;
 }
 
+let backgroundImageProbe = null;
 function applyBackground() {
   const mode = getBackground();
+  const imageLayer = $("#bgImage");
+  const imageUrl = mode === "custom" ? getCustomBackgroundUrl() : "";
   updateClockAccent();
   const rain = mode === "rain";
   $("#bg").style.display = $("#bgFx").style.display = rain ? "block" : "none";
   $("#particles-js").style.display = ["particles", "custom"].includes(mode) ? "block" : "none";
-  $("#bgImage").style.display = mode === "custom" && getCustomBackgroundUrl() ? "block" : "none";
-  $("#bgImage").style.backgroundImage = mode === "custom" && getCustomBackgroundUrl()
-    ? `url("${getCustomBackgroundUrl().replace(/["\\)]/g, (c) => c === ")" ? "%29" : "")}")`
-    : "none";
+  imageLayer.style.display = imageUrl ? "block" : "none";
+  // Use an Image probe so failed remote images don't silently leave a blank layer.
+  // Keep a local gradient fallback, which also works in restricted preview/sandbox origins.
+  if (backgroundImageProbe) {
+    backgroundImageProbe.onload = backgroundImageProbe.onerror = null;
+    backgroundImageProbe = null;
+  }
+  imageLayer.style.backgroundImage = "radial-gradient(ellipse at 50% 35%, rgba(45, 75, 130, .48), transparent 65%), linear-gradient(135deg, #111827, #090b14 60%, #172033)";
+  if (imageUrl) {
+    try {
+      const parsed = new URL(imageUrl, location.href);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        const probe = new Image();
+        backgroundImageProbe = probe;
+        probe.referrerPolicy = "no-referrer";
+        probe.onload = () => {
+          if (backgroundImageProbe === probe && getBackground() === "custom" && getCustomBackgroundUrl() === imageUrl) {
+            imageLayer.style.backgroundImage = `url("${parsed.href.replace(/["\\)]/g, (c) => c === ")" ? "%29" : "")}")`;
+          }
+        };
+        probe.onerror = () => {
+          if (backgroundImageProbe === probe) {
+            console.warn("SBX background image failed to load; showing gradient fallback:", imageUrl);
+            imageLayer.style.backgroundImage = "radial-gradient(ellipse at 50% 35%, rgba(45, 75, 130, .48), transparent 65%), linear-gradient(135deg, #111827, #090b14 60%, #172033)";
+          }
+        };
+        probe.src = parsed.href;
+      }
+    } catch (error) {
+      console.warn("Invalid SBX background image URL:", error);
+    }
+  } else {
+    imageLayer.style.backgroundImage = "none";
+  }
   $("#bgDim").classList.toggle("plain", mode === "plain");
   $("#bgTint").style.display = rain || mode === "custom" ? "block" : "none";
   destroyParticles();
@@ -3411,6 +4050,7 @@ function viewMeta(v) {
     case "history": return { title: "History", url: `${S}://history` };
     case "game": return { title: v.game.name, url: `${S}://games/${slug(v.game.name)}`, thumb: v.game.thumb };
     case "locked": return { title: "Locked", url: `${S}://locked` };
+    case "web": return { title: hostOf(v.url) || "Web page", url: v.url };
     default: return { title: "Tab", url: `${S}://` };
   }
 }
@@ -3439,11 +4079,15 @@ function renderView(tab) {
     const kind = CATEGORIES[v.key].kind;
     if (kind === "games") buildGamesPage(tab, "library");
     else if (kind === "ai") buildAiChatPage(tab);
+    else if (kind === "chat") buildChatPage(tab);
+    else if (kind === "builtin") buildToolsPage(tab);
+    else if (kind === "music") buildMusicPage(tab);
     else buildLinksPage(tab, v.key);
   }
   else if (v.type === "saved") buildGamesPage(tab, "saved");
   else if (v.type === "history") buildGamesPage(tab, "history");
   else if (v.type === "game") buildGameView(tab, v.game);
+  else if (v.type === "web") buildWebView(tab, v.url);
 }
 
 function navigate(tab, view) {
@@ -3545,10 +4189,12 @@ function updateChrome() {
    7. Search / address bar
    ========================================================================== */
 
-function getEngineKey() { return ENGINES[store.get("sbxEngine")] ? store.get("sbxEngine") : "default"; }
+function getEngineKey() { return ENGINES[store.get("sbxEngine")] ? store.get("sbxEngine") : "ddg"; }
 function setEngine(key) {
+  if (!ENGINES[key]) return;
   store.set("sbxEngine", key);
   renderEngineSeg();
+  $$("#ntEngineSelect").forEach((select) => { select.value = key; });
   showToast(`${ENGINES[key].label} selected`);
 }
 function renderEngineSeg() {
@@ -3715,7 +4361,7 @@ function buildNewTab(tab) {
         </div>
       </div>
       <div class="nt-corner nt-tr">
-        <button class="pill discord-btn home-lockable" data-locked="true">${ico("bubble")}Discord<span class="home-lock-badge" aria-hidden="true">${ico("lock")}</span></button>
+        <button class="pill discord-btn">${ico("bubble")}Discord</button>
       </div>
       <div class="nt-hero">
         <h1 class="nt-title">${esc(CONFIG.brand)}</h1>
@@ -3729,31 +4375,46 @@ function buildNewTab(tab) {
           </label>
           <div class="sg" hidden></div>
         </div>
+        <div class="nt-engine-row"><label for="ntEngineSelect">Search with</label><select id="ntEngineSelect" class="cloak-select" aria-label="Homepage search engine"></select></div>
         <div class="quick"></div>
       </div>
     </div>`;
 
   $(".nt-tl .icon-btn:first-child", el).onclick = () => openSettings();
   $(".nt-tl .icon-btn:last-child", el).onclick = () => openSettings("themes");
-  $(".discord-btn", el).onclick = (e) => { if (e.target.closest("[data-locked]")) go({ type: "locked" }); else openExternal(CONFIG.discord); };
+  $(".discord-btn", el).onclick = () => openExternal(CONFIG.discord);
   $(".home-proxy-lock", el).onclick = () => showToast("Search uses the Ultraviolet proxy when SB HUB is hosted over HTTPS.");
 
   const quick = $(".quick", el);
   QUICK_ROW.forEach((key) => {
     const c = CATEGORIES[key];
     const b = document.createElement("button");
-    b.className = "q-btn" + (["games", "ai"].includes(key) ? "" : " home-lockable");
+    const unlocked = ["games", "ai", "music"].includes(key);
+    b.className = "q-btn" + (unlocked ? "" : " home-lockable");
     b.title = c.label;
     b.setAttribute("aria-label", c.label);
-    if (!["games", "ai"].includes(key)) b.setAttribute("data-locked", "true");
-    b.innerHTML = ico(c.icon) + (["games", "ai"].includes(key) ? "" : `<span class="home-lock-badge" aria-hidden="true">${ico("lock")}</span>`);
-    if (["games", "ai"].includes(key)) {
+    if (!unlocked) b.setAttribute("data-locked", "true");
+    b.innerHTML = ico(c.icon) + (unlocked ? "" : `<span class="home-lock-badge" aria-hidden="true">${ico("lock")}</span>`);
+    if (unlocked) {
       b.onclick = () => go({ type: "category", key });
     } else {
       b.onclick = () => go({ type: "locked" });
     }
     quick.appendChild(b);
   });
+  const engineSelect = $("#ntEngineSelect", el);
+  if (engineSelect) {
+    engineSelect.replaceChildren();
+    Object.entries(ENGINES).forEach(([key, engine]) => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = engine.full;
+      engineSelect.appendChild(option);
+    });
+    engineSelect.value = getEngineKey();
+    engineSelect.addEventListener("change", () => setEngine(engineSelect.value));
+  }
+
   const plus = document.createElement("button");
   plus.className = "q-btn home-lockable";
   plus.title = "Add shortcut";
@@ -3918,6 +4579,590 @@ function playRandomGame() {
   openGame(games[Math.floor(Math.random() * games.length)]);
 }
 
+/* ----- Music app: Deezer search/art/playback + UV full-service panel ----- */
+
+const MUSIC_REPO = "sbhubfounder/sbsbsbsbsbsb";
+const MUSIC_DIR = "music";
+const MUSIC_EXT = /\.(mp3|ogg|wav|m4a|flac|opus)$/i;
+const MUSIC_BASE = `https://raw.githubusercontent.com/${MUSIC_REPO}/main/${MUSIC_DIR}/`;
+const MUSIC_TRACKS = [];
+
+const MUSIC_CATALOG = {
+  "Top Hits": [
+    "Espresso Sabrina Carpenter",
+    "BIRDS OF A FEATHER Billie Eilish",
+    "Die With A Smile Lady Gaga Bruno Mars",
+    "APT. ROSE Bruno Mars",
+    "A Bar Song Tipsy Shaboozey",
+    "Lose Control Teddy Swims",
+    "Beautiful Things Benson Boone",
+    "Good Luck Babe Chappell Roan",
+  ],
+  "Pop": [
+    "Please Please Please Sabrina Carpenter",
+    "Taste Sabrina Carpenter",
+    "Cruel Summer Taylor Swift",
+    "As It Was Harry Styles",
+    "Anti-Hero Taylor Swift",
+    "Levitating Dua Lipa",
+    "Pink Pony Club Chappell Roan",
+    "Flowers Miley Cyrus",
+  ],
+  "Hip-Hop": [
+    "Not Like Us Kendrick Lamar",
+    "Luther Kendrick Lamar SZA",
+    "HUMBLE. Kendrick Lamar",
+    "God's Plan Drake",
+    "Sicko Mode Travis Scott",
+    "Industry Baby Lil Nas X",
+    "Rich Flex Drake 21 Savage",
+    "Money Trees Kendrick Lamar",
+  ],
+  "Chill": [
+    "Sunset Lover Petit Biscuit",
+    "Night Owl Galimatias",
+    "Weightless Marconi Union",
+    "Experience Ludovico Einaudi",
+    "Holocene Bon Iver",
+    "Pink + White Frank Ocean",
+    "Ivy Frank Ocean",
+    "Lo-fi hip hop beats",
+  ],
+};
+
+const trackTitle = (name) => name.replace(MUSIC_EXT, "").replace(/[_-]+/g, " ").trim();
+const deezerCache = new Map();
+
+function deezerCover(md5, size = 500) {
+  if (!md5) return "";
+  return `https://cdn-images.dzcdn.net/images/cover/${md5}/${size}x${size}-000000-80-0-0.jpg`;
+}
+
+function normalizeDeezerTrack(t) {
+  if (!t || !t.id) return null;
+  return {
+    id: String(t.id),
+    title: t.title || t.title_short || "Unknown",
+    artist: (t.artist && t.artist.name) || "Unknown",
+    art: deezerCover(t.md5_image, 500) || (t.album && t.album.cover_medium) || "",
+    artSmall: deezerCover(t.md5_image, 250) || (t.album && t.album.cover_small) || "",
+    preview: t.preview || "",
+    duration: Number(t.duration) || 0,
+    deezerUrl: t.link || `https://www.deezer.com/track/${t.id}`,
+    source: "deezer",
+  };
+}
+
+async function deezerSearch(query, limit = 12) {
+  const key = `s:${limit}:${query.toLowerCase()}`;
+  if (deezerCache.has(key)) return deezerCache.get(key);
+  const url = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=${limit}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Deezer search failed");
+  const data = await res.json();
+  const list = (data.data || []).map(normalizeDeezerTrack).filter(Boolean);
+  deezerCache.set(key, list);
+  return list;
+}
+
+async function deezerResolve(query) {
+  const key = `r:${query.toLowerCase()}`;
+  if (deezerCache.has(key)) return deezerCache.get(key);
+  try {
+    const list = await deezerSearch(query, 5);
+    const hit = list[0] || null;
+    deezerCache.set(key, hit);
+    return hit;
+  } catch {
+    deezerCache.set(key, null);
+    return null;
+  }
+}
+
+async function fetchMusicList() {
+  const res = await fetch(`https://api.github.com/repos/${MUSIC_REPO}/contents/${MUSIC_DIR}?ref=main`, {
+    headers: { Accept: "application/vnd.github+json" },
+  });
+  if (!res.ok) throw new Error("GitHub listing failed: " + res.status);
+  const items = await res.json();
+  return items
+    .filter((f) => f.type === "file" && MUSIC_EXT.test(f.name))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+    .map((f) => ({ title: trackTitle(f.name), file: f.name, source: "local" }));
+}
+
+function musicCanProxy() {
+  const sandboxedOrigin = location.origin === "null";
+  const proxyRuntimeUnavailable = !window.isSecureContext || !("serviceWorker" in navigator);
+  return !(location.protocol === "file:" || sandboxedOrigin || proxyRuntimeUnavailable);
+}
+
+async function loadUvIntoFrame(frame, statusEl, url, label) {
+  if (isBlockedContent(url)) {
+    if (statusEl) { statusEl.hidden = false; statusEl.textContent = "This content is blocked on SB HUB."; }
+    showToast("This site is blocked on SB HUB.");
+    return false;
+  }
+  if (!musicCanProxy()) {
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent = "Ultraviolet needs HTTPS hosting. Open SB HUB on its live domain to stream full apps.";
+    }
+    showToast("Proxy unavailable here — playing audio previews instead when possible.");
+    return false;
+  }
+  if (statusEl) {
+    statusEl.hidden = false;
+    statusEl.textContent = `Loading ${label || "music"} through Ultraviolet…`;
+  }
+  try {
+    const missing = await checkProxyAssets();
+    if (missing.length) throw new Error(`Missing proxy files: ${missing.join(", ")}`);
+    const [registered] = await Promise.all([registerProxyServiceWorker(), prepareProxyTransport()]);
+    if (!registered) throw new Error("proxy service worker could not start");
+    const encoded = proxyUrl(url);
+    if (!encoded) throw new Error("proxy config is missing");
+    if (!frame.isConnected) return false;
+    frame.src = new URL(encoded, location.href).href;
+    const hide = () => { if (statusEl) statusEl.hidden = true; };
+    frame.addEventListener("load", hide, { once: true });
+    setTimeout(hide, 14000);
+    return true;
+  } catch (error) {
+    console.error("Music UV load failed:", error);
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent = `Couldn't start Ultraviolet: ${error.message || "check proxy setup"}`;
+    }
+    return false;
+  }
+}
+
+function fmtTime(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+}
+
+function buildMusicPage(tab) {
+  const el = tab.el;
+  el.innerHTML = `
+    <div class="music-app">
+      <aside class="music-nav" aria-label="Music navigation">
+        <div class="music-nav-brand">${ico("music")}<span>Music</span></div>
+        <button type="button" class="music-nav-btn on" data-music-view="browse">${ico("flame")}<span>Browse</span></button>
+        <button type="button" class="music-nav-btn" data-music-view="search">${ico("search")}<span>Search</span></button>
+        <button type="button" class="music-nav-btn" data-music-view="library">${ico("bookmark")}<span>Your Library</span></button>
+        <div class="music-nav-label">Full apps</div>
+        <button type="button" class="music-nav-btn" data-music-view="ytmusic">${ico("globe")}<span>YouTube Music</span></button>
+        <button type="button" class="music-nav-btn" data-music-view="spotify">${ico("globe")}<span>Spotify</span></button>
+        <button type="button" class="music-nav-btn" data-music-view="soundcloud">${ico("globe")}<span>SoundCloud</span></button>
+        <p class="music-nav-foot">Covers & previews from <b>Deezer</b>. Full apps open in-page via <b>Ultraviolet</b>.</p>
+      </aside>
+
+      <div class="music-stage">
+        <div class="music-scroll">
+          <div class="music-view on" data-view="browse">
+            <h2 class="music-page-title">Browse</h2>
+            <div class="music-browse-rows"></div>
+          </div>
+          <div class="music-view" data-view="search">
+            <h2 class="music-page-title">Search</h2>
+            <form class="music-search-hero" id="musicSearchForm">
+              <label class="music-search-bar">
+                ${ico("search")}
+                <input class="music-q" type="search" placeholder="What do you want to listen to?" autocomplete="off" spellcheck="false" aria-label="Search music">
+              </label>
+            </form>
+            <div class="music-results" id="musicResults">
+              <div class="music-results-empty">Search for a song, artist, or album.</div>
+            </div>
+          </div>
+          <div class="music-view" data-view="library">
+            <h2 class="music-page-title">Your Library</h2>
+            <p class="music-results-empty" style="padding-top:0">Local tracks from the GitHub music folder.</p>
+            <ul class="music-lib-list" id="musicLibList"><li class="music-results-empty">Loading…</li></ul>
+          </div>
+        </div>
+
+        <div class="music-listen" id="musicListen" aria-label="Streaming player">
+          <div class="music-listen-bar">
+            <button type="button" class="icon-btn music-listen-back" title="Back" aria-label="Back">${ico("back")}</button>
+            <strong class="music-listen-title">Streaming</strong>
+            <span class="muted music-listen-sub">via Ultraviolet</span>
+          </div>
+          <div class="music-listen-frame-wrap">
+            <div class="music-listen-status" id="musicListenStatus">Preparing Ultraviolet…</div>
+            <iframe class="music-listen-frame" id="musicListenFrame" title="Music stream" allow="autoplay; fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+
+      <footer class="music-bar">
+        <div class="music-bar-track">
+          <div class="music-bar-art" id="musicBarArt">${ico("music")}</div>
+          <div class="music-bar-meta">
+            <strong id="musicBarTitle">Not playing</strong>
+            <span id="musicBarArtist">Pick a song from Browse or Search</span>
+          </div>
+        </div>
+        <div class="music-bar-controls">
+          <div class="music-bar-btns">
+            <button type="button" class="music-bar-prev" title="Previous" aria-label="Previous">${ico("skip-back")}</button>
+            <button type="button" class="music-bar-play" title="Play" aria-label="Play">${ico("play")}</button>
+            <button type="button" class="music-bar-next" title="Next" aria-label="Next">${ico("skip-forward")}</button>
+          </div>
+          <div class="music-progress">
+            <span id="musicTimeCur">0:00</span>
+            <input type="range" id="musicSeek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+            <span id="musicTimeEnd">0:00</span>
+          </div>
+        </div>
+        <div class="music-bar-right">
+          <span class="pill-uv" id="musicBarPill">${ico("shield")} Ready</span>
+        </div>
+      </footer>
+      <audio id="musicLocalAudio" preload="auto"></audio>
+    </div>`;
+
+  const rowsEl = $(".music-browse-rows", el);
+  const resultsEl = $("#musicResults", el);
+  const libList = $("#musicLibList", el);
+  const listen = $("#musicListen", el);
+  const listenFrame = $("#musicListenFrame", el);
+  const listenStatus = $("#musicListenStatus", el);
+  const listenTitle = $(".music-listen-title", el);
+  const barTitle = $("#musicBarTitle", el);
+  const barArtist = $("#musicBarArtist", el);
+  const barArt = $("#musicBarArt", el);
+  const barPill = $("#musicBarPill", el);
+  const playBtn = $(".music-bar-play", el);
+  const seek = $("#musicSeek", el);
+  const timeCur = $("#musicTimeCur", el);
+  const timeEnd = $("#musicTimeEnd", el);
+  const audio = $("#musicLocalAudio", el);
+
+  let queue = [];
+  let queueIndex = -1;
+  let localTracks = [];
+  let seeking = false;
+
+  const setPlayIcon = (playing) => {
+    playBtn.innerHTML = playing ? ico("pause") : ico("play");
+    playBtn.title = playing ? "Pause" : "Play";
+  };
+
+  const setBar = (track) => {
+    if (!track) {
+      barTitle.textContent = "Not playing";
+      barArtist.textContent = "Pick a song from Browse or Search";
+      barArt.innerHTML = ico("music");
+      barPill.innerHTML = `${ico("shield")} Ready`;
+      return;
+    }
+    barTitle.textContent = track.title || "Unknown";
+    barArtist.textContent = track.artist || (track.source === "local" ? "Local library" : "");
+    if (track.art || track.artSmall) {
+      const src = track.artSmall || track.art;
+      barArt.innerHTML = `<img src="${esc(src)}" alt="">`;
+      const img = $("img", barArt);
+      if (img) img.onerror = () => { barArt.innerHTML = ico("music"); };
+    } else {
+      barArt.innerHTML = ico("music");
+    }
+  };
+
+  const showView = (name) => {
+    $$(".music-view", el).forEach((v) => v.classList.toggle("on", v.dataset.view === name));
+    $$(".music-nav-btn[data-music-view]", el).forEach((b) => {
+      const streamKeys = ["ytmusic", "spotify", "soundcloud"];
+      if (streamKeys.includes(b.dataset.musicView)) return;
+      b.classList.toggle("on", b.dataset.musicView === name);
+    });
+  };
+
+  const closeListen = () => {
+    listen.classList.remove("on");
+    listenFrame.removeAttribute("src");
+  };
+
+  const openStream = async (url, title) => {
+    listenTitle.textContent = title || "Streaming";
+    listen.classList.add("on");
+    $$(".music-nav-btn[data-music-view]", el).forEach((b) => {
+      if (["ytmusic", "spotify", "soundcloud"].includes(b.dataset.musicView)) b.classList.remove("on");
+    });
+    return loadUvIntoFrame(listenFrame, listenStatus, url, title);
+  };
+
+  const playAudioUrl = async (url) => {
+    if (!url) return false;
+    try {
+      audio.src = url;
+      await audio.play();
+      setPlayIcon(true);
+      return true;
+    } catch (err) {
+      console.warn("Audio play failed:", err);
+      setPlayIcon(false);
+      return false;
+    }
+  };
+
+  const playTrack = async (track, list, index) => {
+    if (!track) return;
+    if (list) { queue = list; queueIndex = index; }
+    else if (index >= 0) queueIndex = index;
+
+    closeListen();
+    setBar(track);
+    timeCur.textContent = "0:00";
+    timeEnd.textContent = track.duration ? fmtTime(track.duration) : "0:30";
+    seek.value = 0;
+
+    if (track.source === "local" && track.file) {
+      barPill.innerHTML = `${ico("shield")} Local file`;
+      const ok = await playAudioUrl(MUSIC_BASE + encodeURIComponent(track.file));
+      if (!ok) showToast("Couldn't play this local file.");
+      return;
+    }
+
+    // Prefer Deezer preview — real audio that works without UV
+    if (track.preview) {
+      barPill.innerHTML = `${ico("shield")} Playing preview`;
+      const ok = await playAudioUrl(track.preview);
+      if (ok) {
+        showToast(`Playing ${track.title}`);
+        return;
+      }
+    }
+
+    // Resolve via Deezer if we only have a query/title
+    if (!track.preview && (track.title || track.query)) {
+      barPill.innerHTML = `${ico("shield")} Finding track…`;
+      const q = track.query || `${track.title} ${track.artist || ""}`.trim();
+      const resolved = await deezerResolve(q);
+      if (resolved && resolved.preview) {
+        Object.assign(track, resolved);
+        setBar(track);
+        barPill.innerHTML = `${ico("shield")} Playing preview`;
+        const ok = await playAudioUrl(resolved.preview);
+        if (ok) {
+          showToast(`Playing ${resolved.title}`);
+          return;
+        }
+      }
+    }
+
+    // Fallback: open YouTube Music search in UV panel for the full track
+    barPill.innerHTML = `${ico("shield")} Ultraviolet`;
+    const q = `${track.title || ""} ${track.artist || ""}`.trim() || track.query || "";
+    showToast("Opening full player via Ultraviolet…");
+    await openStream(
+      `https://music.youtube.com/search?q=${encodeURIComponent(q)}`,
+      track.title || q
+    );
+  };
+
+  const makeCard = (track, list, index) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "music-card";
+    btn.innerHTML = `
+      <div class="music-card-art loading">
+        <div class="music-card-play">${ico("play")}</div>
+      </div>
+      <span class="music-card-title">${esc(track.title || "Loading…")}</span>
+      <span class="music-card-artist">${esc(track.artist || "")}</span>`;
+    const artBox = $(".music-card-art", btn);
+
+    const apply = (t) => {
+      if (!t || !btn.isConnected) return;
+      $(".music-card-title", btn).textContent = t.title;
+      $(".music-card-artist", btn).textContent = t.artist || "";
+      if (t.art) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.src = t.art;
+        img.onload = () => {
+          img.classList.add("loaded");
+          artBox.classList.remove("loading");
+        };
+        img.onerror = () => {
+          artBox.classList.remove("loading");
+          img.remove();
+        };
+        // replace any previous img
+        $$("img", artBox).forEach((x) => x.remove());
+        artBox.insertBefore(img, artBox.firstChild);
+      } else {
+        artBox.classList.remove("loading");
+      }
+    };
+
+    if (track.art || track.preview) {
+      apply(track);
+    } else if (track.query || track.title) {
+      const q = track.query || `${track.title} ${track.artist || ""}`.trim();
+      deezerResolve(q).then((hit) => {
+        if (!hit) {
+          artBox.classList.remove("loading");
+          return;
+        }
+        // mutate shared track object so queue has preview/art
+        Object.assign(track, hit);
+        apply(track);
+      });
+    } else {
+      artBox.classList.remove("loading");
+    }
+
+    btn.onclick = () => playTrack(track, list, index);
+    return btn;
+  };
+
+  // Build browse rows — resolve covers from Deezer in the background
+  Object.entries(MUSIC_CATALOG).forEach(([rowName, queries]) => {
+    const row = document.createElement("section");
+    row.className = "music-row";
+    row.innerHTML = `
+      <div class="music-row-head"><h3>${ico("flame")}<span>${esc(rowName)}</span></h3></div>
+      <div class="music-row-scroll"></div>`;
+    const scroll = $(".music-row-scroll", row);
+    const list = queries.map((q) => ({ query: q, title: q.split(" ").slice(0, 3).join(" "), artist: "", source: "deezer" }));
+    list.forEach((t, i) => scroll.appendChild(makeCard(t, list, i)));
+    rowsEl.appendChild(row);
+  });
+
+  $$(".music-nav-btn[data-music-view]", el).forEach((btn) => {
+    btn.onclick = async () => {
+      const v = btn.dataset.musicView;
+      const apps = {
+        ytmusic: ["https://music.youtube.com", "YouTube Music"],
+        spotify: ["https://open.spotify.com", "Spotify"],
+        soundcloud: ["https://soundcloud.com", "SoundCloud"],
+      };
+      if (apps[v]) {
+        $$(".music-nav-btn[data-music-view]", el).forEach((b) => b.classList.remove("on"));
+        btn.classList.add("on");
+        setBar({ title: apps[v][1], artist: "Full app via Ultraviolet", art: "" });
+        barPill.innerHTML = `${ico("shield")} Ultraviolet`;
+        try { audio.pause(); setPlayIcon(false); } catch { /* */ }
+        await openStream(apps[v][0], apps[v][1]);
+        return;
+      }
+      closeListen();
+      showView(v);
+      if (v === "search") setTimeout(() => $(".music-q", el)?.focus(), 40);
+    };
+  });
+
+  $(".music-listen-back", el).onclick = () => {
+    closeListen();
+    showView("browse");
+  };
+
+  $("#musicSearchForm", el).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const q = $(".music-q", el).value.trim();
+    if (!q) return;
+    resultsEl.innerHTML = `<div class="music-results-empty">Searching…</div>`;
+    try {
+      const hits = await deezerSearch(q, 24);
+      resultsEl.replaceChildren();
+      if (!hits.length) {
+        resultsEl.innerHTML = `<div class="music-results-empty">No results for “${esc(q)}”.</div>`;
+        return;
+      }
+      hits.forEach((t, i) => resultsEl.appendChild(makeCard(t, hits, i)));
+    } catch (err) {
+      console.error(err);
+      resultsEl.innerHTML = `<div class="music-results-empty">Search failed. Check your connection.</div>`;
+    }
+  });
+
+  /* Local library */
+  const playLocal = (i) => {
+    if (!localTracks.length) return;
+    const idx = ((i % localTracks.length) + localTracks.length) % localTracks.length;
+    playTrack(localTracks[idx], localTracks, idx);
+    $$("#musicLibList li", el).forEach((li, n) => li.classList.toggle("active", n === idx));
+  };
+
+  $(".music-bar-prev", el).onclick = () => {
+    if (!queue.length) return;
+    const next = (queueIndex - 1 + queue.length) % queue.length;
+    playTrack(queue[next], queue, next);
+  };
+  $(".music-bar-next", el).onclick = () => {
+    if (!queue.length) return;
+    const next = (queueIndex + 1) % queue.length;
+    playTrack(queue[next], queue, next);
+  };
+  playBtn.onclick = async () => {
+    if (!audio.src) {
+      if (queue.length && queueIndex >= 0) playTrack(queue[queueIndex], queue, queueIndex);
+      else showView("browse");
+      return;
+    }
+    if (audio.paused) {
+      try { await audio.play(); setPlayIcon(true); } catch { showToast("Couldn't resume playback."); }
+    } else {
+      audio.pause();
+      setPlayIcon(false);
+    }
+  };
+
+  audio.addEventListener("timeupdate", () => {
+    if (seeking) return;
+    const d = audio.duration || 30;
+    const t = audio.currentTime || 0;
+    timeCur.textContent = fmtTime(t);
+    timeEnd.textContent = fmtTime(d);
+    seek.value = String(Math.round((t / d) * 1000));
+  });
+  audio.addEventListener("play", () => setPlayIcon(true));
+  audio.addEventListener("pause", () => setPlayIcon(false));
+  audio.addEventListener("ended", () => {
+    setPlayIcon(false);
+    if (queue.length) {
+      const next = (queueIndex + 1) % queue.length;
+      playTrack(queue[next], queue, next);
+    }
+  });
+  seek.addEventListener("input", () => { seeking = true; });
+  seek.addEventListener("change", () => {
+    const d = audio.duration || 30;
+    audio.currentTime = (Number(seek.value) / 1000) * d;
+    seeking = false;
+  });
+
+  fetchMusicList()
+    .then((items) => {
+      localTracks = items.length ? items : MUSIC_TRACKS;
+      libList.replaceChildren();
+      if (!localTracks.length) {
+        libList.innerHTML = `<li class="music-results-empty">No local tracks yet. Upload audio to the music/ folder on GitHub.</li>`;
+        return;
+      }
+      localTracks.forEach((t, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="n">${i + 1}</span><span class="t">${esc(t.title)}</span>`;
+        li.onclick = () => playLocal(i);
+        libList.appendChild(li);
+      });
+    })
+    .catch(() => {
+      libList.innerHTML = `<li class="music-results-empty">Couldn't load the local library.</li>`;
+    });
+
+  tab.cleanup = () => {
+    try { audio.pause(); audio.removeAttribute("src"); } catch { /* */ }
+    listenFrame.removeAttribute("src");
+  };
+}
+
+
 /* ----- Link pages (Apps, AI, Music, ...) ----- */
 
 function buildLinksPage(tab, key) {
@@ -4018,6 +5263,17 @@ function buildAiChatPage(tab) {
     event.preventDefault();
     const text = input.value.trim();
     if (!text || submitBtn.disabled) return;
+    if (text.length > AI_MAX_MESSAGE_CHARS) {
+      showToast(`Please keep each message under ${AI_MAX_MESSAGE_CHARS.toLocaleString()} characters.`);
+      return;
+    }
+    const now = Date.now();
+    const waitMs = AI_MIN_INTERVAL_MS - (now - lastAiRequestAt);
+    if (waitMs > 0) {
+      showToast(`Please wait ${Math.ceil(waitMs / 1000)}s before sending another AI message.`);
+      return;
+    }
+    lastAiRequestAt = now;
     messages.push({ role: "user", content: text });
     messages = messages.slice(-40);
     saveMessages();
@@ -4038,12 +5294,18 @@ function buildAiChatPage(tab) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: messages.slice(-12) }),
-      });
-      const result = await response.json();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      let response;
+      try {
+        response = await fetch(AI_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: messages.slice(-12) }),
+          signal: controller.signal,
+        });
+      } finally { clearTimeout(timeoutId); }
+      const result = await response.json().catch(() => ({}));
       pending.remove();
       if (!response.ok) throw new Error(result.error || `Request failed (${response.status}).`);
       messages.push({ role: "assistant", content: result.message });
@@ -4060,7 +5322,9 @@ function buildAiChatPage(tab) {
       errorMsg.appendChild(errorAvatar);
       const errorBubble = document.createElement("div");
       errorBubble.className = "ai-message-bubble";
-      errorBubble.textContent = error.message || "Couldn't reach SB HUB AI. Please try again.";
+      errorBubble.textContent = error.name === "AbortError"
+        ? "SB HUB AI took too long to respond. The server may be waking up or overloaded. Try again shortly."
+        : (error.message || "Couldn't reach SB HUB AI. Check your connection and whether the API allows requests from this page (CORS)." );
       errorMsg.appendChild(errorBubble);
       messagesEl.appendChild(errorMsg);
       messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -4163,7 +5427,7 @@ function buildGameView(tab, game) {
   };
 
   fetchGameHtml(game).then((html) => {
-    if (!frame.isConnected || !frame.contentDocument) return;
+    if (!frame.isConnected) return;
     status.textContent = `Starting ${game.name}…`;
     frame.addEventListener("load", () => {
       clearTimeout(loadTimeout);
@@ -4176,9 +5440,9 @@ function buildGameView(tab, game) {
     loadTimeout = setTimeout(() => {
       showError(`${game.name} is taking too long to start. Retry the download or open it in a new browser tab.`);
     }, 45000);
-    frame.contentDocument.open();
-    frame.contentDocument.write(html);
-    frame.contentDocument.close();
+    // Render downloaded game HTML in an opaque-origin sandbox. Do not grant
+    // allow-same-origin: repository HTML must not gain access to SB HUB storage/DOM.
+    frame.srcdoc = html;
   }).catch((error) => {
     console.error(`Failed to load ${game.name} from the game repository:`, error);
     showError(`Couldn't load ${game.name}: ${error.message || "repository request failed"}`);
@@ -4190,16 +5454,12 @@ function buildGameView(tab, game) {
 function openGame(game) { go({ type: "game", game }); }
 
 async function openGameInBrowserTab(game) {
-  const w = window.open("about:blank", "_blank");
-  if (!w) { showToast("Popup blocked! Please allow popups."); return; }
-  w.document.body.textContent = `Loading ${game.name} from the game repository…`;
-  try {
-    const html = await fetchGameHtml(game);
-    w.document.open(); w.document.write(html); w.document.close();
-  } catch (error) {
-    console.error(`Failed to open ${game.name} from the game repository:`, error);
-    w.document.body.textContent = `Couldn't load ${game.name}: ${error.message || "repository request failed"}`;
-  }
+  let url;
+  try { url = new URL(game.url); } catch { showToast("This game has an invalid URL."); return; }
+  if (url.protocol !== "https:") { showToast("Games must use HTTPS."); return; }
+  // Navigate directly to the game's own origin instead of writing remote HTML
+  // into an about:blank tab that inherits SB HUB's origin.
+  openExternal(url.href);
 }
 
 /* ==========================================================================
@@ -4263,7 +5523,8 @@ function initStatusBar() {
       timeZoneName: "short",
     });
     $("#stClock").textContent = time;
-    $$(".nt-clock").forEach((el) => { el.textContent = `Current time · ${time}`; });
+    const homeTime = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    $$(".nt-clock").forEach((el) => { el.textContent = `Current time · ${homeTime}`; });
   };
   clock();
   setInterval(clock, 1000);
@@ -4282,10 +5543,13 @@ function initStatusBar() {
   [["stTos", "tos", "Terms of Service"], ["stPrivacy", "privacy", "Privacy"], ["stDmca", "dmca", "DMCA"]].forEach(([id, key, label]) => {
     const a = $("#" + id);
     const url = CONFIG.legal[key];
-    if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
+    if (key === "privacy" && !url) {
+      a.classList.remove("dim");
+      a.href = "#privacy";
+      a.onclick = (e) => { e.preventDefault(); openPrivacyPolicy(); };
+    } else if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
     else {
-      a.classList.add("dim");
-      a.addEventListener("click", (e) => { e.preventDefault(); showToast(`No ${label} page linked yet — set it in CONFIG.legal.`); });
+      a.onclick = (e) => { e.preventDefault(); openLegal(key); };
     }
   });
 
@@ -4299,6 +5563,33 @@ function initStatusBar() {
   $$(".sb-link[data-route]").forEach((b) => (b.onclick = () => go({ type: b.dataset.route })));
 }
 
+
+/* Privacy policy: honest summary of current client behavior; update if backend practices change. */
+function openPrivacyPolicy() {
+  let modal = $("#privacyPolicyModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "privacyPolicyModal";
+    modal.className = "modal-overlay";
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="privacyPolicyTitle" style="max-width:44rem;max-height:85vh;overflow:auto">
+      <div class="modal-header"><h2 id="privacyPolicyTitle">SB HUB Privacy Policy</h2><button class="icon-btn" id="privacyPolicyClose" aria-label="Close privacy policy">×</button></div>
+      <div class="modal-body" style="display:block;line-height:1.65;color:var(--text-main)">
+        <p><strong>Last updated: October 10, 2026</strong></p>
+        <p><strong>Information stored locally.</strong> SB HUB may save preferences, theme settings, tab-cloak settings, notes, and AI chat history in this browser's local storage. These are not automatically synced by this HTML file, but anyone with access to this browser profile may be able to view them.</p>
+        <p><strong>AI requests.</strong> When you use SB HUB AI, your recent conversation messages are sent to <code>https://sbhub-ai.onrender.com/api/chat</code> for processing. The AI host's own logs, retention, and privacy practices are controlled by its operator and are not verified by this page. Do not send passwords, personal information, or secrets.</p>
+        <p><strong>External services.</strong> SB HUB loads resources and/or requests data from external providers, including jsDelivr, Google Fonts, favicon services, and image hosts. Those providers may receive technical information such as your IP address and request metadata.</p>
+        <p><strong>Proxy and visited sites.</strong> If proxying is enabled on a hosted deployment, requests pass through that deployment's proxy infrastructure and the destination websites. Those operators may process connection data. Proxying is not anonymous and does not guarantee that a school, employer, network, or website cannot see activity.</p>
+        <p><strong>Chat rooms.</strong> Chat messages, display names, and room codes are sent through the third-party relay ntfy.sh. Messages are not end-to-end encrypted, so anyone with a room code can read them. Do not share sensitive information in chat.</p>
+        <p><strong>Security and children.</strong> Do not use the site to bypass access controls or submit sensitive data. Report security issues to the site operator. This policy is a template summary, not legal advice; the operator should confirm it matches actual server logging, retention, and hosting practices before publishing.</p>
+        <p><strong>Contact.</strong> For privacy questions, contact the SB HUB operator through the official community/support channel.</p>
+      </div><div class="modal-close-row"><button class="btn primary" id="privacyPolicyDone">Close</button></div></div>`;
+    document.body.appendChild(modal);
+    $("#privacyPolicyClose", modal).onclick = () => modal.classList.remove("show");
+    $("#privacyPolicyDone", modal).onclick = () => modal.classList.remove("show");
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+  }
+  modal.classList.add("show");
+}
 
 /* ==========================================================================
    10. Settings
@@ -4375,6 +5666,10 @@ function applyTabPreset(v) {
     "Gmail": ["Gmail", "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"],
     "Canvas": ["Canvas", "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico"],
     "Google Classroom": ["Google Classroom", "https://ssl.gstatic.com/classroom/favicon.png"],
+    "Google Slides": ["Google Slides", "https://ssl.gstatic.com/docs/presentations/images/favicon-2023q4.ico"],
+    "Microsoft Teams": ["Microsoft Teams", "https://statics.teams.cdn.office.net/evergreen-assets/icons/microsoft_teams_logo_refresh.svg"],
+    "Zoom": ["Zoom", "https://st1.zoom.us/zoom.ico"],
+    "Study Portal": ["Study Portal", "https://www.google.com/favicon.ico"],
     "New Tab": ["New Tab", "https://www.google.com/favicon.ico"],
   };
   if (map[v]) { $("#customTabTitle").value = map[v][0]; $("#customFavicon").value = map[v][1]; }
@@ -4384,7 +5679,7 @@ function saveTabCloak() {
   if (title) store.set("tabTitle", title);
   if (icon) store.set("tabIcon", icon);
   applyTabCloak();
-  showToast("Tab cloak saved!");
+  showToast("Tab title/icon changed. This does not hide network activity or the address bar.");
 }
 function resetTabCloak() {
   store.del("tabTitle");
@@ -4635,7 +5930,9 @@ $("#scUrl").addEventListener("keydown", (e) => { if (e.key === "Enter") saveShor
 $("#scName").addEventListener("keydown", (e) => { if (e.key === "Enter") saveShortcut(); });
 
 function initApp() {
-  registerProxyServiceWorker();
+  showDomainWarning();
+  // Register the proxy service worker only when proxy mode is actually requested.
+  // This keeps the homepage and non-proxy features working on static deployments.
   applyUiScale(parseInt(store.get("sbxUiScale", "100"), 10) || 100);
   if (store.get("sbxSidebarCollapsed") === "true" && !isMobile()) $("#app").classList.add("collapsed");
 
@@ -4667,6 +5964,406 @@ function initApp() {
   loadValidKeys();
   loadExclusiveGames();
   checkUpdateLog();
+}
+
+/* ==========================================================================
+   Chat rooms. Room code = topic on the ntfy.sh relay (no account needed).
+   Messages are NOT end-to-end encrypted; anyone with the code can read them.
+   ========================================================================== */
+const CHAT_HOST = "https://ntfy.sh";
+const CHAT_MAX = 50;
+const CHAT_HB_MS = 20000;
+const CHAT_STALE_MS = 50000;
+const CHAT_GLOBAL = "GLOBAL";            // one shared room for everyone on the site, no people limit
+const CHAT_GLOBAL_HB_MS = 60000;         // lighter heartbeat so a big crowd doesn't flood the relay
+const CHAT_SEND_GAP_MS = 2000;           // minimum gap between messages from one browser
+const chatIsGlobal = () => chat.code === CHAT_GLOBAL;
+const chatStaleMs = () => (chatIsGlobal() ? 150000 : CHAT_STALE_MS);
+const chat = { room: false, code: "", me: "", name: "", es: null, hb: null, ui: null, members: new Map(), msgs: [], el: null };
+
+const chatTopic = () => "sbhub-" + chat.code.toLowerCase();
+const chatNewId = () => Math.random().toString(36).slice(2, 10);
+function chatMakeCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return code;
+}
+
+function chatSend(payload) {
+  const message = JSON.stringify({ ...payload, from: chat.me, name: chat.name });
+  return fetch(CHAT_HOST, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic: chatTopic(), message }),
+  }).catch(() => { /* offline: next heartbeat will try again */ });
+}
+
+function chatPruneAndCount() {
+  const now = Date.now();
+  for (const [id, m] of chat.members) if (now - m.seen > chatStaleMs()) chat.members.delete(id);
+  return chat.members.size;
+}
+
+function chatAddLine(line) {
+  chat.msgs.push(line);
+  if (chat.msgs.length > 200) chat.msgs.shift();
+  renderChatMessages();
+}
+
+function chatOnEvent(raw) {
+  let ev, p;
+  try { ev = JSON.parse(raw); p = JSON.parse(ev.message); } catch { return; }
+  if (!ev || ev.event !== "message" || !p || typeof p.from !== "string") return;
+  if (p.from === chat.me) return;
+  const name = typeof p.name === "string" ? p.name.slice(0, 24) : "Guest";
+  const isNew = !chat.members.has(p.from);
+  chat.members.set(p.from, { name, seen: Date.now() });
+  if (p.type === "hello") {
+    if (!chatIsGlobal()) chatSend({ type: "here" }); // global room: skip the reply flood
+    chatAddLine({ system: true, text: `${name} joined` });
+  } else if (p.type === "bye") {
+    chat.members.delete(p.from);
+    chatAddLine({ system: true, text: `${name} left` });
+  } else if (p.type === "msg" && typeof p.text === "string") {
+    chatAddLine({ name, text: p.text.slice(0, 500) });
+  }
+  if (isNew) renderChatCount();
+  renderChatCount();
+}
+
+async function chatJoin(code, name) {
+  code = String(code || "").trim().toUpperCase();
+  if (code !== CHAT_GLOBAL && !/^[A-Z0-9]{4,10}$/.test(code)) { showToast("Room codes are 4 to 10 letters or numbers."); return; }
+  chatLeave(true);
+  chat.room = true;
+  chat.code = code;
+  chat.me = chatNewId();
+  chat.name = (name || "").trim().slice(0, 24) || "Guest " + chat.me.slice(0, 4);
+  store.set("sbxChatName", chat.name);
+  chat.members = new Map([[chat.me, { name: chat.name, seen: Date.now() }]]);
+  chat.msgs = [{ system: true, text: code === CHAT_GLOBAL ? "Joined the global chat" : `Joined room ${code}` }];
+  renderChatPage();
+
+  chat.es = new EventSource(`${CHAT_HOST}/${chatTopic()}/sse`);
+  chat.es.onmessage = (e) => chatOnEvent(e.data);
+  chat.es.onerror = () => chatAddLine({ system: true, text: "Connection hiccup, reconnecting…" });
+  chatSend({ type: "hello" });
+
+  // Wait for existing members to answer "here", then enforce the room limit.
+  await new Promise((resolve) => setTimeout(resolve, 4000));
+  if (!chat.room || chat.code !== code) return;
+  if (!chatIsGlobal() && chatPruneAndCount() > CHAT_MAX) {
+    showToast(`That room is full (${CHAT_MAX} people max).`);
+    chatLeave();
+    return;
+  }
+  chat.hb = setInterval(() => chatSend({ type: "hb" }), chatIsGlobal() ? CHAT_GLOBAL_HB_MS : CHAT_HB_MS);
+  chat.ui = setInterval(renderChatCount, 5000);
+  renderChatCount();
+}
+
+function chatLeave(silent) {
+  if (!chat.room) return;
+  chatSend({ type: "bye" });
+  if (chat.es) chat.es.close();
+  clearInterval(chat.hb);
+  clearInterval(chat.ui);
+  chat.es = null; chat.hb = null; chat.ui = null;
+  chat.room = false; chat.code = ""; chat.msgs = []; chat.members = new Map(); chat.lastSent = 0;
+  if (!silent) renderChatPage();
+}
+
+function chatSendText(text) {
+  text = String(text || "").trim().slice(0, 500);
+  if (!text || !chat.room) return;
+  if (Date.now() - (chat.lastSent || 0) < CHAT_SEND_GAP_MS) { showToast("Slow down a little before sending again."); return; }
+  chat.lastSent = Date.now();
+  chatSend({ type: "msg", text });
+  chatAddLine({ name: chat.name, text, mine: true });
+}
+
+function buildChatPage(tab) {
+  chat.el = tab.el;
+  tab.el.innerHTML = `<div class="chat-page"></div>`;
+  renderChatPage();
+}
+
+function renderChatPage() {
+  const root = chat.el && chat.el.querySelector(".chat-page");
+  if (!root || !chat.el.isConnected) return;
+  if (!chat.room) {
+    root.innerHTML = `<div class="chat-lobby">
+      <h2>Chat rooms</h2>
+      <button class="btn primary chat-global">Join global chat (everyone on SB HUB)</button>
+      <p class="chat-note">Or create a room and send the code to friends, or enter a code to join. Private rooms hold up to ${CHAT_MAX} people.</p>
+      <label class="chat-field">Your name<input class="chat-name" maxlength="24" value="${esc(store.get("sbxChatName") || "")}" placeholder="Guest"></label>
+      <button class="btn primary chat-create">Create room</button>
+      <div class="chat-join-row"><input class="chat-code" maxlength="10" placeholder="Room code" spellcheck="false" autocapitalize="characters"><button class="btn chat-join">Join</button></div>
+      <p class="chat-note">Chat messages go through a third-party relay (ntfy.sh) and aren't private: anyone with the room code can read them. Don't share passwords, personal information, or anything sensitive.</p>
+    </div>`;
+    const nameIn = root.querySelector(".chat-name");
+    root.querySelector(".chat-global").onclick = () => chatJoin(CHAT_GLOBAL, nameIn.value);
+    root.querySelector(".chat-create").onclick = () => chatJoin(chatMakeCode(), nameIn.value);
+    const codeIn = root.querySelector(".chat-code");
+    root.querySelector(".chat-join").onclick = () => chatJoin(codeIn.value, nameIn.value);
+    codeIn.addEventListener("keydown", (e) => { if (e.key === "Enter") chatJoin(codeIn.value, nameIn.value); });
+    return;
+  }
+  root.innerHTML = `<div class="chat-room">
+    <div class="chat-head">
+      <div>
+        <div class="chat-title">${chatIsGlobal() ? "<b>Global chat</b>" : `Room <b>${esc(chat.code)}</b>`}</div>
+        <div class="chat-online" id="chatOnline"></div>
+      </div>
+      <div class="chat-actions">
+        <button class="btn chat-copy">Copy code</button>
+        <button class="btn chat-leave">Leave</button>
+      </div>
+    </div>
+    <div class="chat-msgs" role="log" aria-live="polite"></div>
+    <form class="chat-form">
+      <input class="chat-input" maxlength="500" placeholder="Message" autocomplete="off" aria-label="Message">
+      <button class="btn primary" type="submit">Send</button>
+    </form>
+  </div>`;
+  root.querySelector(".chat-copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(chat.code); showToast("Room code copied"); }
+    catch { showToast("Room code: " + chat.code); }
+  };
+  root.querySelector(".chat-leave").onclick = () => { chatLeave(); showToast("Left the room"); };
+  root.querySelector(".chat-form").onsubmit = (e) => {
+    e.preventDefault();
+    const input = root.querySelector(".chat-input");
+    chatSendText(input.value);
+    input.value = "";
+  };
+  renderChatMessages();
+  renderChatCount();
+}
+
+function renderChatMessages() {
+  const box = chat.el && chat.el.querySelector(".chat-msgs");
+  if (!box) return;
+  box.innerHTML = chat.msgs.map((m) => m.system
+    ? `<div class="chat-sys">${esc(m.text)}</div>`
+    : `<div class="chat-msg"><b>${esc(m.name)}</b> <span>${esc(m.text)}</span></div>`).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+function renderChatCount() {
+  const el = chat.el && chat.el.querySelector("#chatOnline");
+  if (!el || !chat.room) return;
+  const n = chatPruneAndCount();
+  el.textContent = chatIsGlobal() ? `Online now: ${n}` : `Friends online: ${n} · Room limit ${CHAT_MAX}`;
+}
+
+/* ==========================================================================
+   Tools: built-in utilities (no outside sites, no device or network controls)
+   ========================================================================== */
+const BUILTIN_TOOLS = [
+  { id: "password", name: "Password generator", desc: "Random passwords made in your browser", build: buildPasswordTool },
+  { id: "wordcount", name: "Word counter", desc: "Words, characters, and reading time", build: buildWordCountTool },
+  { id: "units", name: "Unit converter", desc: "Length, weight, and temperature", build: buildUnitTool },
+];
+
+function buildToolsPage(tab) {
+  const el = tab.el;
+  el.innerHTML = `
+    <div class="page">
+      <div class="page-head"><h2>${ico("wrench")}<span>Tools</span></h2></div>
+      <p class="page-note">Built-in tools that run right here in SB HUB.</p>
+      <div class="grid pg-grid tool-grid"></div>
+      <div class="tool-panel" hidden></div>
+    </div>`;
+  const grid = $(".tool-grid", el), panel = $(".tool-panel", el);
+  const showGrid = () => { panel.hidden = true; panel.replaceChildren(); grid.hidden = false; };
+  BUILTIN_TOOLS.forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "link-card";
+    b.innerHTML = `<span class="lc-text"><strong>${esc(t.name)}</strong><small>${esc(t.desc)}</small></span>${ico("external")}`;
+    b.onclick = () => {
+      grid.hidden = true;
+      panel.hidden = false;
+      panel.innerHTML = `<div class="tool-head"><button class="btn tool-back">${ico("back")}Back to tools</button><h3>${esc(t.name)}</h3></div><div class="tool-body"></div>`;
+      $(".tool-back", panel).onclick = showGrid;
+      t.build($(".tool-body", panel));
+    };
+    grid.appendChild(b);
+  });
+}
+
+function buildPasswordTool(body) {
+  body.innerHTML = `
+    <div class="tool-col">
+      <label class="tool-row">Length <input class="field pw-len" type="range" min="8" max="64" value="16"><span class="pw-len-out">16</span></label>
+      <label class="tool-row"><input type="checkbox" class="pw-upper" checked> Uppercase</label>
+      <label class="tool-row"><input type="checkbox" class="pw-lower" checked> Lowercase</label>
+      <label class="tool-row"><input type="checkbox" class="pw-num" checked> Numbers</label>
+      <label class="tool-row"><input type="checkbox" class="pw-sym" checked> Symbols</label>
+      <div class="tool-out"><code class="pw-out"></code><button class="btn pw-copy">Copy</button></div>
+      <button class="btn primary pw-gen">Generate</button>
+    </div>`;
+  const q = (sel) => $(sel, body);
+  const gen = () => {
+    let pool = "";
+    if (q(".pw-upper").checked) pool += "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    if (q(".pw-lower").checked) pool += "abcdefghijkmnopqrstuvwxyz";
+    if (q(".pw-num").checked) pool += "23456789";
+    if (q(".pw-sym").checked) pool += "!@#$%^&*-_=+?";
+    if (!pool) { showToast("Pick at least one character type."); return; }
+    const len = Number(q(".pw-len").value);
+    const bytes = new Uint32Array(len);
+    crypto.getRandomValues(bytes);
+    q(".pw-out").textContent = Array.from(bytes, (n) => pool[n % pool.length]).join("");
+  };
+  q(".pw-len").addEventListener("input", (e) => { q(".pw-len-out").textContent = e.target.value; gen(); });
+  q(".pw-gen").onclick = gen;
+  q(".pw-copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(q(".pw-out").textContent); showToast("Password copied"); }
+    catch { showToast("Copy failed — select the text and copy it."); }
+  };
+  gen();
+}
+
+function buildWordCountTool(body) {
+  body.innerHTML = `
+    <div class="tool-col">
+      <textarea class="field wc-text" rows="10" placeholder="Paste or type text here…"></textarea>
+      <div class="wc-stats"></div>
+    </div>`;
+  const text = $(".wc-text", body), stats = $(".wc-stats", body);
+  const update = () => {
+    const t = text.value;
+    const words = (t.match(/\S+/g) || []).length;
+    const chars = t.length;
+    const noSpaces = t.replace(/\s/g, "").length;
+    const sentences = (t.match(/[^.!?]+[.!?]+/g) || []).length;
+    const minutes = words / 200;
+    stats.innerHTML = [
+      ["Words", words], ["Characters", chars], ["No spaces", noSpaces], ["Sentences", sentences],
+      ["Reading time", words ? (minutes < 1 ? "under 1 min" : `${Math.round(minutes)} min`) : "0 min"],
+    ].map(([k, v]) => `<div class="wc-stat"><span>${k}</span><strong>${v}</strong></div>`).join("");
+  };
+  text.addEventListener("input", update);
+  update();
+}
+
+function buildUnitTool(body) {
+  const UNITS = {
+    Length: { meter: 1, kilometer: 1000, centimeter: 0.01, mile: 1609.344, foot: 0.3048, inch: 0.0254 },
+    Weight: { kilogram: 1, gram: 0.001, pound: 0.45359237, ounce: 0.028349523125 },
+  };
+  const TEMP = ["Celsius", "Fahrenheit", "Kelvin"];
+  body.innerHTML = `
+    <div class="tool-col">
+      <label class="tool-row">Category <select class="cloak-select uc-cat"><option>Length</option><option>Weight</option><option>Temperature</option></select></label>
+      <label class="tool-row">Value <input class="field uc-val" type="number" value="1"></label>
+      <label class="tool-row">From <select class="cloak-select uc-from"></select></label>
+      <label class="tool-row">To <select class="cloak-select uc-to"></select></label>
+      <div class="tool-out"><code class="uc-out"></code></div>
+    </div>`;
+  const q = (sel) => $(sel, body);
+  const fill = () => {
+    const cat = q(".uc-cat").value;
+    const names = cat === "Temperature" ? TEMP : Object.keys(UNITS[cat]);
+    const opts = names.map((n) => `<option>${n}</option>`).join("");
+    q(".uc-from").innerHTML = opts;
+    q(".uc-to").innerHTML = opts;
+    if (names.length > 1) q(".uc-to").selectedIndex = 1;
+    convert();
+  };
+  const toC = (v, u) => (u === "Celsius" ? v : u === "Fahrenheit" ? (v - 32) * 5 / 9 : v - 273.15);
+  const fromC = (c, u) => (u === "Celsius" ? c : u === "Fahrenheit" ? c * 9 / 5 + 32 : c + 273.15);
+  const convert = () => {
+    const v = Number(q(".uc-val").value);
+    const cat = q(".uc-cat").value, from = q(".uc-from").value, to = q(".uc-to").value;
+    if (!Number.isFinite(v) || !from || !to) { q(".uc-out").textContent = "—"; return; }
+    let out;
+    if (cat === "Temperature") out = fromC(toC(v, from), to);
+    else out = v * UNITS[cat][from] / UNITS[cat][to];
+    q(".uc-out").textContent = `${v} ${from} = ${Number(out.toPrecision(8))} ${to}`;
+  };
+  q(".uc-cat").addEventListener("change", fill);
+  q(".uc-from").addEventListener("change", convert);
+  q(".uc-to").addEventListener("change", convert);
+  q(".uc-val").addEventListener("input", convert);
+  fill();
+}
+
+/* Terms of Service and DMCA pages, plus the file/non-domain warning. */
+const LEGAL_DOCS = {
+  tos: {
+    title: "SB HUB Terms of Service",
+    html: `<p><strong>Last updated: October 10, 2026</strong></p>
+      <p><strong>Acceptance.</strong> By using SB HUB you agree to these terms. If you do not agree, please do not use the site.</p>
+      <p><strong>Use of the site.</strong> SB HUB is for personal, lawful use. Do not use it to break the law, harass others, attack or overload any service, or bypass access controls you are not allowed to bypass.</p>
+      <p><strong>Third-party content.</strong> SB HUB links to and may load games, websites, and other services run by third parties. SB HUB does not control that content and is not responsible for it.</p>
+      <p><strong>No warranty.</strong> The site is provided "as is" and "as available," without warranties of any kind. Features such as the proxy, AI chat, and game lists may change, break, or be removed at any time.</p>
+      <p><strong>Limitation of liability.</strong> To the fullest extent the law allows, the SB HUB operators are not liable for any damages arising from your use of the site.</p>
+      <p><strong>Changes.</strong> These terms may be updated. Continuing to use the site after an update means you accept the updated terms.</p>
+      <p class="muted" style="margin-top:0.8rem">Made by Apex and Star</p>`
+  },
+  dmca: {
+    title: "SB HUB DMCA Notice",
+    html: `<p><strong>Last updated: October 10, 2026</strong></p>
+      <p><strong>Respecting copyright.</strong> SB HUB respects the intellectual property rights of others. SB HUB does not host copyrighted files itself; it may link to or load content from third-party sites, and we respond to valid notices about that content.</p>
+      <p><strong>Filing a notice.</strong> If you believe material on or linked from SB HUB infringes your copyright, send a written notice to the SB HUB operators through the official Discord server with: (1) your physical or electronic signature; (2) identification of the copyrighted work you claim was infringed; (3) identification of the material and where it appears on the site; (4) your contact information; (5) a statement that you have a good-faith belief the use is not authorized by the owner, its agent, or the law; and (6) a statement, under penalty of perjury, that the information in the notice is accurate and that you are the owner or authorized to act for the owner.</p>
+      <p><strong>Counter-notice.</strong> If you believe material was removed or disabled by mistake, you may send a counter-notice with the same kind of contact and signature information, along with a statement under penalty of perjury that you believe the material was removed in error.</p>
+      <p><strong>Repeat infringers.</strong> SB HUB may disable access for users or sources that repeatedly infringe copyright.</p>
+      <p class="muted" style="margin-top:0.8rem">Made by Apex and Star</p>`
+  }
+};
+
+function openLegal(key) {
+  const doc = LEGAL_DOCS[key];
+  if (!doc) return;
+  let modal = document.getElementById("legal-" + key);
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "legal-" + key;
+    modal.className = "modal-overlay";
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:44rem;max-height:85vh;overflow:auto">
+      <div class="modal-header"><h2>${doc.title}</h2><button class="icon-btn" aria-label="Close">×</button></div>
+      <div class="modal-body" style="display:block;line-height:1.65;color:var(--text-main)">${doc.html}</div>
+      <div class="modal-close-row"><button class="btn primary" style="display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;padding:0.7rem 1.2rem">OK</button></div></div>`;
+    document.body.appendChild(modal);
+    const close = () => modal.classList.remove("show");
+    modal.querySelector(".icon-btn").onclick = close;
+    modal.querySelector(".btn.primary").onclick = close;
+    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  }
+  modal.classList.add("show");
+}
+
+// Where the "Open SB HUB" button sends visitors. Change this if your live address differs.
+const SB_HUB_LIVE_URL = "https://sbhub-ai.onrender.com";
+
+function showDomainWarning() {
+  const onDomain = /^https?:$/.test(location.protocol) && !!location.hostname;
+  if (onDomain) return;
+  if (document.getElementById("gate")) {
+    // Countdown is still up: wait until it's gone, then show the warning.
+    const waiter = setInterval(() => {
+      if (!document.getElementById("gate")) { clearInterval(waiter); showDomainWarning(); }
+    }, 500);
+    return;
+  }
+  if (document.getElementById("domainWarning")) return;
+  const wrap = document.createElement("div");
+  wrap.id = "domainWarning";
+  wrap.setAttribute("role", "alertdialog");
+  wrap.setAttribute("aria-modal", "true");
+  wrap.style.cssText = "position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:1.5rem;background:rgba(2,5,12,0.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);";
+  wrap.innerHTML = `<div style="max-width:30rem;width:100%;padding:1.8rem 1.6rem 1.4rem;border-radius:1.1rem;background:var(--surface-color);border:1px solid var(--line-strong);box-shadow:var(--shadow);text-align:center">
+    <h2 style="font-size:1.35rem;margin-bottom:0.7rem">SB HUB works best on a domain</h2>
+    <p style="color:var(--text-muted);line-height:1.6;margin-bottom:1.3rem">You're opening this page from a local file or without a website address. Some features, like the proxy and AI chat, may not work properly until SB HUB is hosted on a domain.</p>
+    <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn primary" id="domainWarningOk" style="min-width:7rem;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;padding:0.7rem 1.2rem">OK</button>
+      <a class="btn" id="domainWarningOpen" href="${SB_HUB_LIVE_URL}" style="min-width:7rem;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;padding:0.7rem 1.2rem;text-decoration:none">Open SB HUB</a>
+    </div></div>`;
+  document.body.appendChild(wrap);
+  wrap.querySelector("#domainWarningOk").onclick = () => wrap.remove();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
