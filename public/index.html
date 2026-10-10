@@ -1,3 +1,15 @@
+<!--
+  ____   ____    _   _ _   _ ____  
+ / ___| | __ )  | | | | | | | __ ) 
+ \___ \ |  _ \  | |_| | | | |  _ \ 
+  ___) || |_) | |  _  | |_| | |_) |
+ |____/ |____/  |_| |_|\___/|____/ 
+
+     Made by Apex and Star
+   https://discord.gg/gyrKQMVem5
+        September 2026
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,15 +21,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-/* ==========================================================================
-   SB HUB — browser-style shell
-   All sizes are in rem. The root font size scales with the window width
-   (and the "Interface size" setting), which is what gives the compact,
-   zoomed-out look. Change --ui-scale or the clamp() below to taste.
-   ========================================================================== */
 
 :root {
-  /* theme variables (the JS theme engine overwrites these) */
+
   --bg-color: #070c18;
   --surface-color: #0d1526;
   --surface-hover: #16213a;
@@ -687,6 +693,189 @@ a.st-item:hover, button.st-item:hover { color: #fff; }
 .locked-icon { font-size: 4rem; color: #888; opacity: 0.7; }
 .locked-title { font-size: 1.8rem; font-weight: 600; color: var(--text-main); }
 .locked-msg { font-size: 1.1rem; color: var(--text-muted); max-width: 25rem; }
+
+.ai-chat-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 2rem;
+  background: transparent;
+}
+.ai-chat-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ai-chat-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.ai-chat-header .muted {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+}
+.ai-chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  max-width: 60rem;
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  align-items: flex-start;
+}
+.ai-message {
+  display: flex;
+  gap: 0.8rem;
+  max-width: min(48rem, 90%);
+  align-items: flex-start;
+}
+.ai-message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.ai-message-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+.ai-message-avatar svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.ai-message-bubble {
+  padding: 0.75rem 1.2rem;
+  border-radius: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+.ai-message.user .ai-message-bubble {
+  background: rgba(100, 150, 255, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+}
+.ai-message.assistant .ai-message-bubble {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+.ai-message.error .ai-message-bubble {
+  color: #ffb4b4;
+  background: rgba(255, 100, 100, 0.15);
+}
+.ai-chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 50rem;
+  margin-top: auto;
+}
+.ai-chat-input {
+  min-height: 5rem;
+  max-height: 10rem;
+  resize: vertical;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  font-size: 1rem;
+  backdrop-filter: blur(0.8rem);
+  -webkit-backdrop-filter: blur(0.8rem);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.ai-chat-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.ai-chat-input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+}
+.ai-chat-input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ai-model-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.4rem;
+  padding: 0 0.9rem;
+  border-radius: 99rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(0.8rem);
+  -webkit-backdrop-filter: blur(0.8rem);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ai-model-selector:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+}
+.ai-chat-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.ai-action-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+.ai-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+.ai-action-btn.ai-submit-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+@media (max-width: 720px) {
+  .ai-chat-page { padding: 1rem; }
+  .ai-chat-header h2 { font-size: 2rem; }
+  .ai-chat-header { margin-bottom: 1.5rem; margin-top: 2rem; }
+  .ai-chat-form { max-width: 100%; }
+  .ai-chat-messages { max-width: 100%; }
+}
+@media (max-width: 720px) {
+  .ai-chat-page { padding: 0.75rem; }
+  .ai-chat-messages { padding: 0.65rem; }
+  .ai-message { max-width: 96%; }
+}
 
 .engine {
   margin-top: 3.1rem;
@@ -1702,8 +1891,105 @@ body {
 }
 
   </style>
+<style>
+/* ---------- launch gate (countdown + early access) ---------- */
+#gate { position: fixed; inset: 0; z-index: 99999; background: #09090b; color: #ededf0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; font-family: "Inter", system-ui, sans-serif; }
+#gate * { font-family: inherit; }
+#gate .g-main { width: 100%; max-width: 320px; text-align: center; }
+#gate .g-logo { width: 42px; height: 42px; object-fit: contain; display: block; margin: 0 auto 18px; }
+#gate .g-label { font-size: 12.5px; color: #6f7380; letter-spacing: 0.02em; margin-bottom: 22px; }
+#gate .g-label b { color: #ededf0; font-weight: 500; }
+#gate .g-row { display: grid; grid-template-columns: repeat(4, 1fr); }
+#gate .g-cell + .g-cell { border-left: 1px solid #1f2127; }
+#gate .g-num { display: block; font-size: 24px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+#gate .g-unit { display: block; margin-top: 5px; font-size: 10px; color: #6f7380; text-transform: uppercase; letter-spacing: 0.1em; }
+#gate .g-access { position: absolute; left: 0; right: 0; bottom: max(26px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 24px; }
+#gate form { display: flex; align-items: center; width: min(224px, 100%); border-bottom: 1px solid #1f2127; transition: border-color .2s; }
+#gate form:focus-within { border-color: #6f7380; }
+#gate input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: #ededf0; font-size: 13px; padding: 9px 0; letter-spacing: 0.08em; text-transform: uppercase; }
+#gate input::placeholder { color: #6f7380; text-transform: none; letter-spacing: 0; }
+#gate button { background: none; border: 0; color: #6f7380; font-size: 16px; cursor: pointer; padding: 5px 0 5px 10px; transition: color .2s; }
+#gate button:hover { color: #ededf0; }
+#gate .g-msg { min-height: 16px; font-size: 12px; color: #6f7380; }
+#gate .g-msg.err { color: #e5675f; } #gate .g-msg.ok { color: #5fcf8a; }
+#gate .g-or { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 8px; font-size: 12px; color: #6f7380; text-align: center; }
+#gate .g-btn { display: inline-block; padding: 6px 12px; border-radius: 8px; border: 1px solid #2a2d36; color: #ededf0; font-size: 12px; font-weight: 500; text-decoration: none; transition: background .2s, border-color .2s; }
+#gate .g-btn:hover { background: #15171d; border-color: #3a3e4a; }
+@keyframes gShake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+#gate .shake { animation: gShake .28s; }
+</style>
 </head>
 <body>
+<div id="gate" role="dialog" aria-modal="true" aria-label="Launch countdown">
+  <div class="g-main" role="timer">
+    <img class="g-logo" src="https://raw.githubusercontent.com/sbhubfounder/sbsbsbsbsbsb/main/icons/sbsblogo.png" alt="SB HUB">
+    <div class="g-label">Opening <b>October 25</b></div>
+    <div class="g-row">
+      <div class="g-cell"><span class="g-num" id="gD">--</span><span class="g-unit">Days</span></div>
+      <div class="g-cell"><span class="g-num" id="gH">--</span><span class="g-unit">Hrs</span></div>
+      <div class="g-cell"><span class="g-num" id="gM">--</span><span class="g-unit">Min</span></div>
+      <div class="g-cell"><span class="g-num" id="gS">--</span><span class="g-unit">Sec</span></div>
+    </div>
+  </div>
+  <div class="g-access">
+    <form id="gForm" autocomplete="off">
+      <input id="gCode" type="text" placeholder="Early access code" aria-label="Early access code" spellcheck="false" autocapitalize="characters">
+      <button type="submit" aria-label="Enter">&rarr;</button>
+    </form>
+    <div class="g-msg" id="gMsg" aria-live="polite"></div>
+    <div class="g-or">
+      <span>For now you can join the Discord</span>
+      <a class="g-btn" href="https://discord.gg/RW2tYdBYdt" target="_blank" rel="noopener noreferrer">Discord</a>
+      <span>or fill out an early access form</span>
+      <a class="g-btn" href="https://forms.gle/KUziBFqWCz6QfqaZ8" target="_blank" rel="noopener noreferrer">Early access form</a>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var gate = document.getElementById("gate");
+  var LAUNCH = new Date(2026, 9, 25, 0, 0, 0); // Oct 25, 2026 12:00 AM, visitor's local time
+  var SALT = "sbhub-gate-v1", ITER = 310000, HASH = "0f84379fe086c70e2427fe92eab2968c7e6d4ee188defce9f7092a3e51f7ea26"; // only a slow hash of the code is stored, never the code itself
+  async function derive(v) {
+    var enc = new TextEncoder();
+    var key = await crypto.subtle.importKey("raw", enc.encode(v.trim().toUpperCase()), "PBKDF2", false, ["deriveBits"]);
+    var bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode(SALT), iterations: ITER }, key, 256);
+    return Array.from(new Uint8Array(bits)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+  }
+  var KEY = "sbhubEarlyAccess";
+  function open() { clearInterval(timer); gate.remove(); }
+  // Already entered a valid code before? Skip the gate.
+  try { if (localStorage.getItem(KEY) === HASH) { gate.remove(); return; } } catch (e) {}
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  function tick() {
+    var left = LAUNCH - Date.now();
+    if (left <= 0) { open(); return; } // launch day: gate lifts for everyone
+    var s = Math.floor(left / 1000);
+    document.getElementById("gD").textContent = Math.floor(s / 86400);
+    document.getElementById("gH").textContent = pad(Math.floor(s / 3600) % 24);
+    document.getElementById("gM").textContent = pad(Math.floor(s / 60) % 60);
+    document.getElementById("gS").textContent = pad(s % 60);
+  }
+  var timer = setInterval(tick, 1000);
+  tick();
+  document.getElementById("gForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var input = document.getElementById("gCode"), msg = document.getElementById("gMsg");
+    var ok = false;
+    try { ok = (await derive(input.value)) === HASH; }
+    catch (err) { msg.className = "g-msg err"; msg.textContent = "Can't verify here. Open the site over https."; return; }
+    if (ok) {
+      msg.className = "g-msg ok"; msg.textContent = "Access granted";
+      try { localStorage.setItem(KEY, HASH); } catch (err) {}
+      setTimeout(open, 600);
+    } else {
+      msg.className = "g-msg err"; msg.textContent = "Invalid code";
+      input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+    }
+  });
+})();
+</script>
+
 <!-- Icon sprite (Lucide-style line icons) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
@@ -2109,6 +2395,8 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script src="/baremux/index.js"></script>
+<script src="/uv/uv.bundle.js"></script>
 <script src="/uv/uv.config.js"></script>
 <script>
 /* ==========================================================================
@@ -2198,8 +2486,7 @@ const BACKGROUND_PRESETS = [
   { name: "Minimal black", accent: "#d9f4ff", url: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2400&q=85&sat=-80" },
 ];
 
-/* Sidebar categories. "games" is the built-in library; the rest are link pages
-   that open in a real browser tab. Edit these lists freely. */
+/* Sidebar categories. "games" and "ai" are built-in pages. */
 const CATEGORIES = {
   games: { label: "Games", icon: "gamepad", kind: "games" },
   apps: {
@@ -2211,14 +2498,7 @@ const CATEGORIES = {
       ["Excalidraw", "https://excalidraw.com"], ["Figma", "https://www.figma.com"],
     ],
   },
-  ai: {
-    label: "AI", icon: "bot", kind: "links",
-    links: [
-      ["ChatGPT", "https://chatgpt.com"], ["Claude", "https://claude.ai"],
-      ["Gemini", "https://gemini.google.com"], ["Perplexity", "https://www.perplexity.ai"],
-      ["Copilot", "https://copilot.microsoft.com"], ["Le Chat", "https://chat.mistral.ai"],
-    ],
-  },
+  ai: { label: "SB HUB AI", icon: "bot", kind: "ai" },
   music: {
     label: "Music", icon: "music", kind: "links",
     links: [
@@ -2320,15 +2600,44 @@ function proxyUrl(url) {
   return PROXY_PREFIX + window.__uv$config.encodeUrl(url);
 }
 
+let proxyTransportConnection = null;
+
+async function prepareProxyTransport() {
+  if (!window.BareMux || typeof window.BareMux.BareMuxConnection !== "function") {
+    throw new Error("The proxy transport library did not load.");
+  }
+  if (!proxyTransportConnection) {
+    proxyTransportConnection = new window.BareMux.BareMuxConnection("/baremux/worker.js");
+  }
+  const transportPath = "/epoxy/index.mjs";
+  if (await proxyTransportConnection.getTransport() !== transportPath) {
+    const wispUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
+    await proxyTransportConnection.setTransport(transportPath, [{ wisp: wispUrl }]);
+  }
+}
+
 function openProxied(url) {
   const encoded = proxyUrl(url);
   if (!encoded) {
-    showToast("Proxy is unavailable. Run SB HUB through the Shadow Node server.");
+    showToast("Proxy is unavailable. Open SB HUB from its deployed HTTPS address.");
     return false;
   }
-  const w = window.open(encoded, "_blank");
-  if (w) { try { w.opener = null; } catch { /* cross-origin */ } }
-  else showToast("Popup blocked — allow popups for this page.");
+  const w = window.open("about:blank", "_blank");
+  if (!w) {
+    showToast("Popup blocked — allow popups for this page.");
+    return false;
+  }
+  try { w.opener = null; } catch { /* cross-origin */ }
+  Promise.all([registerProxyServiceWorker(), prepareProxyTransport()])
+    .then(([registered]) => {
+      if (!registered) throw new Error("The proxy service worker could not start.");
+      if (!w.closed) w.location.replace(encoded);
+    })
+    .catch((error) => {
+      console.error("SB HUB proxy setup failed:", error);
+      w.close();
+      showToast("Proxy could not connect. Please reload SB HUB and try again.");
+    });
   return true;
 }
 
@@ -2336,10 +2645,24 @@ async function registerProxyServiceWorker() {
   if (!window.isSecureContext || !("serviceWorker" in navigator)) return false;
   try {
     await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    return true;
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      await new Promise((resolve) => {
+        const onControllerChange = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        const timeout = setTimeout(() => {
+          navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+          resolve();
+        }, 5000);
+        navigator.serviceWorker.addEventListener("controllerchange", onControllerChange, { once: true });
+      });
+    }
+    return Boolean(navigator.serviceWorker.controller);
   } catch (error) {
     console.error("SB HUB proxy service worker registration failed:", error);
-    showToast("Proxy setup failed. Make sure SB HUB is hosted by Shadow.");
+    showToast("Proxy setup failed. Check that the deployed site includes the Ultraviolet files and /sw.js.");
     return false;
   }
 }
@@ -3112,7 +3435,12 @@ function renderView(tab) {
   tab.el.scrollTop = 0;
   if (v.type === "newtab") buildNewTab(tab);
   else if (v.type === "locked") buildLockedView(tab);
-  else if (v.type === "category") { CATEGORIES[v.key].kind === "games" ? buildGamesPage(tab, "library") : buildLinksPage(tab, v.key); }
+  else if (v.type === "category") {
+    const kind = CATEGORIES[v.key].kind;
+    if (kind === "games") buildGamesPage(tab, "library");
+    else if (kind === "ai") buildAiChatPage(tab);
+    else buildLinksPage(tab, v.key);
+  }
   else if (v.type === "saved") buildGamesPage(tab, "saved");
   else if (v.type === "history") buildGamesPage(tab, "history");
   else if (v.type === "game") buildGameView(tab, v.game);
@@ -3395,7 +3723,7 @@ function buildNewTab(tab) {
         <div class="searchbox">
           <label class="sx sx-locked">
             ${ico("search")}
-            <span class="home-proxy-lock" title="Powered by Shadow Proxy" aria-label="Powered by Shadow Proxy">${ico("shield")}</span>
+            <span class="home-proxy-lock" title="Powered by Ultraviolet" aria-label="Powered by Ultraviolet">${ico("shield")}</span>
             <input class="nt-input" type="text" placeholder="Search or enter URL..." autocomplete="off" spellcheck="false" aria-label="Search or enter URL">
             <span class="kbd">${isMac ? "⌘K" : "Ctrl+K"}</span>
           </label>
@@ -3408,18 +3736,18 @@ function buildNewTab(tab) {
   $(".nt-tl .icon-btn:first-child", el).onclick = () => openSettings();
   $(".nt-tl .icon-btn:last-child", el).onclick = () => openSettings("themes");
   $(".discord-btn", el).onclick = (e) => { if (e.target.closest("[data-locked]")) go({ type: "locked" }); else openExternal(CONFIG.discord); };
-  $(".home-proxy-lock", el).onclick = () => showToast("Search is routed through Shadow Proxy when hosted.");
+  $(".home-proxy-lock", el).onclick = () => showToast("Search uses the Ultraviolet proxy when SB HUB is hosted over HTTPS.");
 
   const quick = $(".quick", el);
   QUICK_ROW.forEach((key) => {
     const c = CATEGORIES[key];
     const b = document.createElement("button");
-    b.className = "q-btn" + (key === "games" ? "" : " home-lockable");
+    b.className = "q-btn" + (["games", "ai"].includes(key) ? "" : " home-lockable");
     b.title = c.label;
     b.setAttribute("aria-label", c.label);
-    if (key !== "games") b.setAttribute("data-locked", "true");
-    b.innerHTML = ico(c.icon) + (key === "games" ? "" : `<span class="home-lock-badge" aria-hidden="true">${ico("lock")}</span>`);
-    if (key === "games") {
+    if (!["games", "ai"].includes(key)) b.setAttribute("data-locked", "true");
+    b.innerHTML = ico(c.icon) + (["games", "ai"].includes(key) ? "" : `<span class="home-lock-badge" aria-hidden="true">${ico("lock")}</span>`);
+    if (["games", "ai"].includes(key)) {
       b.onclick = () => go({ type: "category", key });
     } else {
       b.onclick = () => go({ type: "locked" });
@@ -3625,6 +3953,136 @@ function buildLinksPage(tab, key) {
   };
   search.addEventListener("input", render);
   render();
+}
+
+function buildAiChatPage(tab) {
+  const el = tab.el;
+  el.innerHTML = `
+    <section class="ai-chat-page" aria-label="SB HUB AI chat">
+      <header class="ai-chat-header">
+        <h2>SB HUB AI</h2>
+        <span class="muted">How can I help?</span>
+      </header>
+      <div class="ai-chat-messages" role="log" aria-live="polite" aria-label="Conversation"></div>
+      <form class="ai-chat-form">
+        <textarea class="ai-chat-input" maxlength="4000" placeholder="Ask me anything…" aria-label="Ask SB HUB AI"></textarea>
+        <div class="ai-chat-input-footer">
+          <div class="ai-model-selector" title="Model: OpenRouter Auto">
+            ${ico("settings")}
+            <span>OpenRouter</span>
+          </div>
+          <div class="ai-chat-actions">
+            <button class="ai-action-btn" type="button" title="Clear conversation" data-ai-clear>${ico("x")}</button>
+            <button class="ai-action-btn ai-submit-btn" type="submit" title="Send message">${ico("forward")}</button>
+          </div>
+        </div>
+      </form>
+    </section>`;
+
+  const messagesEl = $(".ai-chat-messages", el);
+  const input = $(".ai-chat-input", el);
+  const form = $(".ai-chat-form", el);
+  const submitBtn = $(".ai-submit-btn", el);
+  const storageKey = "sbxAiConversation";
+  let messages = store.json(storageKey, []);
+  if (!Array.isArray(messages)) messages = [];
+  messages = messages.filter((message) =>
+    message && ["user", "assistant"].includes(message.role) && typeof message.content === "string"
+  ).slice(-40);
+
+  const renderMessages = () => {
+    messagesEl.replaceChildren();
+    messages.forEach((message) => {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `ai-message ${message.role}`;
+      
+      if (message.role === "assistant") {
+        const avatar = document.createElement("div");
+        avatar.className = "ai-message-avatar";
+        avatar.innerHTML = ico("bot");
+        msgDiv.appendChild(avatar);
+      }
+      
+      const bubble = document.createElement("div");
+      bubble.className = "ai-message-bubble";
+      bubble.textContent = message.content;
+      msgDiv.appendChild(bubble);
+      
+      messagesEl.appendChild(msgDiv);
+    });
+    if (messages.length) messagesEl.scrollTop = messagesEl.scrollHeight;
+  };
+  const saveMessages = () => store.setJson(storageKey, messages.slice(-40));
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const text = input.value.trim();
+    if (!text || submitBtn.disabled) return;
+    messages.push({ role: "user", content: text });
+    messages = messages.slice(-40);
+    saveMessages();
+    renderMessages();
+    input.value = "";
+    submitBtn.disabled = true;
+    const pending = document.createElement("div");
+    pending.className = "ai-message assistant";
+    const avatar = document.createElement("div");
+    avatar.className = "ai-message-avatar";
+    avatar.innerHTML = ico("bot");
+    pending.appendChild(avatar);
+    const bubble = document.createElement("div");
+    bubble.className = "ai-message-bubble";
+    bubble.textContent = "SB HUB AI is thinking…";
+    pending.appendChild(bubble);
+    messagesEl.appendChild(pending);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: messages.slice(-12) }),
+      });
+      const result = await response.json();
+      pending.remove();
+      if (!response.ok) throw new Error(result.error || `Request failed (${response.status}).`);
+      messages.push({ role: "assistant", content: result.message });
+      messages = messages.slice(-40);
+      saveMessages();
+      renderMessages();
+    } catch (error) {
+      pending.remove();
+      const errorMsg = document.createElement("div");
+      errorMsg.className = "ai-message assistant error";
+      const errorAvatar = document.createElement("div");
+      errorAvatar.className = "ai-message-avatar";
+      errorAvatar.innerHTML = ico("bot");
+      errorMsg.appendChild(errorAvatar);
+      const errorBubble = document.createElement("div");
+      errorBubble.className = "ai-message-bubble";
+      errorBubble.textContent = error.message || "Couldn't reach SB HUB AI. Please try again.";
+      errorMsg.appendChild(errorBubble);
+      messagesEl.appendChild(errorMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    } finally {
+      submitBtn.disabled = false;
+      input.focus();
+    }
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  $("[data-ai-clear]", el).addEventListener("click", () => {
+    messages = [];
+    saveMessages();
+    renderMessages();
+    input.focus();
+  });
+  renderMessages();
 }
 
 /* ----- Game player ----- */
