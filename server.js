@@ -16,10 +16,25 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 const publicPath = join(root, "public");
 const port = Number(process.env.PORT) || 8080;
 
+/*
+ * NOTE: Cross-Origin-Embedder-Policy is intentionally NOT set.
+ *
+ * COEP "require-corp" makes the browser reject every cross-origin image,
+ * font and script that does not send a CORP header. That silently killed
+ * album covers, movie posters, the logo and Google Fonts. Ultraviolet does
+ * not need cross-origin isolation (epoxy/wisp use a WebSocket), so leaving
+ * COEP off is safe and makes the whole page load correctly.
+ * COOP is kept: it is harmless and prevents opener-based popups.
+ */
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
   next();
+});
+
+// The service worker must never be served from a stale cache.
+app.get("/sw.js", (req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.sendFile(join(publicPath, "sw.js"));
 });
 
 // IMPORTANT: public files come first.
