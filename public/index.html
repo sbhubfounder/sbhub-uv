@@ -4173,6 +4173,41 @@ async function ensureProxyReady() {
   return proxyReadyPromise;
 }
 
+/**
+ * Explains, in plain words, why the proxy is unavailable. Shown in the page
+ * instead of a blank frame so a hosting problem is obvious at a glance.
+ */
+let __proxyDiagPromise = null;
+function proxyDiagnose() {
+  if (__proxyDiagPromise) return __proxyDiagPromise;
+  __proxyDiagPromise = (async () => {
+    const issues = [];
+    const overHttp = /^https?:$/.test(location.protocol);
+    if (!overHttp) issues.push("this page is opened as a local file — Ultraviolet needs http(s)");
+    else if (!window.isSecureContext) issues.push("the page is not on https");
+    if (!("serviceWorker" in navigator)) issues.push("this browser has no service worker support");
+
+    if (overHttp) {
+      const paths = ["/sw.js", "/uv/uv.bundle.js", "/baremux/worker.js", "/epoxy/index.mjs"];
+      const found = await Promise.all(paths.map(async (p) => {
+        try {
+          const r = await fetch(p, { cache: "no-store", credentials: "same-origin" });
+          const type = (r.headers.get("content-type") || "").toLowerCase();
+          if (!r.ok) return `${p} is missing (HTTP ${r.status})`;
+          if (type.includes("text/html")) return `${p} is served as HTML — this host is not running server.js`;
+          return null;
+        } catch { return `${p} is unreachable`; }
+      }));
+      issues.push(...found.filter(Boolean));
+    }
+    if (overHttp && !navigator.serviceWorker.controller) {
+      issues.push("the service worker is not controlling this page yet — reload once");
+    }
+    return issues;
+  })();
+  return __proxyDiagPromise;
+}
+
 
 /* Adult content filter for everything opened through SB HUB (address bar, search, shortcuts, history). */
 const BLOCKED_HOST_SUFFIXES = [
@@ -4244,7 +4279,12 @@ function buildWebView(tab, url) {
       setTimeout(() => { if (!settled) status.hidden = true; }, 20000);
     } catch (e) {
       const span = status && status.querySelector("span");
-      if (span) span.textContent = "Couldn't load";
+      const issues = await proxyDiagnose().catch(() => []);
+      if (span) {
+        span.textContent = issues.length
+          ? `Proxy offline — ${issues.slice(0, 2).join("; ")}`
+          : "Couldn't load";
+      }
     }
   })();
 }
@@ -5772,8 +5812,11 @@ async function loadUvIntoFrame(frame, statusEl, url, label) {
   } catch (error) {
     console.warn("proxy load failed", url, error);
     if (statusEl) {
+      const issues = await proxyDiagnose().catch(() => []);
       statusEl.hidden = false;
-      statusEl.textContent = "Couldn't load through the proxy";
+      statusEl.textContent = issues.length
+        ? `Proxy offline — ${issues.slice(0, 2).join("; ")}`
+        : "Couldn't load through the proxy";
     }
     return false;
   }
