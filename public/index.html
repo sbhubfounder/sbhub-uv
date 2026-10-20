@@ -3834,16 +3834,36 @@ const AI_API_UPSTREAM = "https://sbhub-ai.onrender.com/api/chat";
 function getAiApiUrl() {
   try {
     const saved = (localStorage.getItem("sbxAiOrigin") || "").trim().replace(/\/$/, "");
-    if (saved && /^https?:\/\//i.test(saved)) return saved + "/api/chat";
+    if (saved && /^https?:\/\//i.test(saved)) {
+      return saved.endsWith("/api/chat") ? saved : (saved + "/api/chat");
+    }
   } catch { /* */ }
-  // Prefer proxy host /api/chat bridge (CORS) when available
+  // Prefer same host if this page is already on the AI service
+  try {
+    if (/sbhub-ai\.onrender\.com$/i.test(location.hostname)) {
+      return location.origin.replace(/\/$/, "") + "/api/chat";
+    }
+  } catch { /* */ }
+  // Prefer UV proxy bridge (if that Render service forwards /api/chat with CORS)
   try {
     const origin = (typeof getProxyOrigin === "function" ? getProxyOrigin() : "").replace(/\/$/, "");
-    if (origin && /onrender\.com$/i.test(new URL(origin).hostname)) {
+    if (origin && !/sbhub-ai\.onrender\.com$/i.test(origin)) {
       return origin + "/api/chat";
     }
   } catch { /* */ }
   return AI_API_UPSTREAM;
+}
+function getAiApiEndpoints() {
+  const list = [];
+  const push = (u) => { if (u && !list.includes(u)) list.push(u); };
+  push(getAiApiUrl());
+  try {
+    const origin = (typeof getProxyOrigin === "function" ? getProxyOrigin() : "").replace(/\/$/, "");
+    if (origin) push(origin + "/api/chat");
+  } catch { /* */ }
+  push(AI_API_UPSTREAM);
+  try { push(location.origin.replace(/\/$/, "") + "/api/chat"); } catch { /* */ }
+  return list;
 }
 const AI_API_URL = AI_API_UPSTREAM;
 // UX guard only: enforce real rate limits on the API server too (per IP/user, not in HTML).
@@ -7991,7 +8011,7 @@ function buildAiChatPage(tab) {
       let result = {};
       try {
         const body = JSON.stringify({ messages: messages.slice(-12), model: modelSelect.value });
-        const endpoints = [getAiApiUrl(), AI_API_UPSTREAM].filter((v, i, a) => v && a.indexOf(v) === i);
+        const endpoints = (typeof getAiApiEndpoints === "function" ? getAiApiEndpoints() : [getAiApiUrl(), AI_API_UPSTREAM]).filter((v, i, a) => v && a.indexOf(v) === i);
         let lastErr = null;
         response = null;
         for (const endpoint of endpoints) {
