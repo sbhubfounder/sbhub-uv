@@ -3702,11 +3702,11 @@ const PROXY_PREFIX = "/uv/service/";
 const DEFAULT_PROXY_ORIGIN = "https://sbhubproxtest.onrender.com";
 // One-time reset so an old saved proxy address from earlier builds can't override the default.
 try {
-  if (localStorage.getItem("sbxProxyOriginV") !== "3") {
+  if (localStorage.getItem("sbxProxyOriginV") !== "4") {
     localStorage.removeItem("sbxProxyOrigin");
     localStorage.removeItem("sbxProxyMode");
     localStorage.removeItem("sbxAiOrigin");
-    localStorage.setItem("sbxProxyOriginV", "3");
+    localStorage.setItem("sbxProxyOriginV", "4");
   }
 } catch (e) { /* */ }
 let resolvedProxyMode = null; // "local" | "remote"
@@ -3801,8 +3801,12 @@ function useRemoteProxy() {
     const origin = (getProxyOrigin() || "").replace(/\/$/, "");
     const here = (location.origin || "").replace(/\/$/, "");
     if (origin && here && origin === here) return false;
-    // Custom domain pointed at same Render service still differs by hostname —
-    // only treat as local when origins match. Otherwise remote boot on proxy host.
+    // Local UV available on this host?
+    if (window.__uv$config && typeof window.__uv$config.encodeUrl === "function") {
+      // still remote if we explicitly want central host only when origins differ
+      if (origin && here && origin !== here) return true;
+      return false;
+    }
     return true;
   } catch { return true; }
 }
@@ -4060,15 +4064,14 @@ function openExternal(url) {
 
 function proxyUrl(url) {
   if (!/^https?:\/\//i.test(url)) return null;
-  if (useRemoteProxy()) return buildProxyBootUrl(url);
+  // Prefer local UV when scripts + SW available on this host (Render BYOD)
   try {
-    if (self.__uv$config && self.__uv$config.encodeUrl) {
-      return (self.__uv$config.prefix || "/uv/service/") + self.__uv$config.encodeUrl(url);
+    if (window.__uv$config && typeof window.__uv$config.encodeUrl === "function" && !useRemoteProxy()) {
+      return (window.__uv$config.prefix || "/uv/service/") + window.__uv$config.encodeUrl(url);
     }
   } catch (e) {}
-  let out = "";
-  for (let i = 0; i < url.length; i++) out += i % 2 ? String.fromCharCode(url.charCodeAt(i) ^ 2) : url[i];
-  return "/uv/service/" + encodeURIComponent(out);
+  // Remote: boot page on the Render UV host
+  return buildProxyBootUrl(url);
 }
 
 
@@ -4184,19 +4187,41 @@ async function registerProxyServiceWorker() {
 async function ensureProxyReady() {
   if (proxyReadyPromise) return proxyReadyPromise;
   proxyReadyPromise = (async () => {
-    try { localStorage.setItem("sbxProxyEngine", "ultraviolet"); localStorage.setItem("sbxProxyOriginV", "3"); } catch (e) {}
-    if (useRemoteProxy()) {
-      resolvedProxyMode = "remote";
-      resolvedProxyEngine = "ultraviolet";
-      proxyAssetsOk = "remote";
-      try { await warmProxyHost(); } catch (e) { console.warn(e); }
-      return "remote";
+    try { localStorage.setItem("sbxProxyEngine", "ultraviolet"); } catch (e) {}
+    const origin = getProxyOrigin();
+    const here = (location.origin || "").replace(/\/$/, "");
+    const same = origin && here && origin === here;
+
+    // Local path (hosted on UV Render service)
+    if (same || (window.__uv$config && window.__uv$config.encodeUrl)) {
+      try {
+        if (window.isSecureContext && "serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+          await navigator.serviceWorker.ready;
+          try { if (reg.active) reg.active.postMessage({ type: "claim" }); } catch (e) {}
+        }
+        if (window.BareMux && window.BareMux.BareMuxConnection) {
+          try {
+            const conn = new window.BareMux.BareMuxConnection("/baremux/worker.js");
+            const wisp = (location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
+            await conn.setTransport("/epoxy/index.mjs", [{ wisp: wisp }]);
+          } catch (e) { console.warn("transport", e); }
+        }
+        resolvedProxyMode = same ? "local" : "local";
+        resolvedProxyEngine = "ultraviolet";
+        proxyAssetsOk = true;
+        return "local";
+      } catch (e) {
+        console.warn("local UV failed, using remote", e);
+      }
     }
-    resolvedProxyMode = "local";
+
+    // Remote Render UV host
+    resolvedProxyMode = "remote";
     resolvedProxyEngine = "ultraviolet";
-    proxyAssetsOk = true;
-    try { await warmProxyHost(); } catch (e) {}
-    return "local";
+    proxyAssetsOk = "remote";
+    try { await warmProxyHost(); } catch (e) { console.warn(e); }
+    return "remote";
   })().catch((err) => {
     proxyReadyPromise = null;
     throw err;
@@ -6452,7 +6477,7 @@ async function mzPlay(track, list, index) {
     }
     const status = document.createElement("div");
     status.hidden = true;
-    const watchUrl = "https://www.youtube.com/watch?v=" + id + "&autoplay=1";
+    const watchUrl = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&modestbranding=1&playsinline=1";
     const ok = await loadUvIntoFrame(frame, status, watchUrl, track.title || "track");
     if (token !== MZ.token) return;
     if (!ok) {
@@ -6583,7 +6608,7 @@ async function mzVideoFor(track) {
   track.videoId = id;
   MZ.source = "video";
   if (!frame) return "fail";
-  const ok = await loadUvIntoFrame(frame, status, `https://www.youtube.com/watch?v=${id}&autoplay=1`, track.title);
+  const ok = await loadUvIntoFrame(frame, status, `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`, track.title);
   return ok ? "ok" : "fail";
 }
 
@@ -9400,7 +9425,7 @@ function showDomainWarning() {
   wrap.querySelector("#domainWarningOk").onclick = () => wrap.remove();
 }
 
-try { localStorage.setItem("sbxProxyEngine", "ultraviolet"); localStorage.setItem("sbxProxyOriginV", "3"); } catch (e) {}
+try { localStorage.setItem("sbxProxyEngine", "ultraviolet"); localStorage.setItem("sbxProxyOriginV", "4"); } catch (e) {}
 document.addEventListener("DOMContentLoaded", initApp);
 
 </script>
