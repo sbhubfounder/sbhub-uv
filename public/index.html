@@ -478,9 +478,42 @@ input, select, textarea { font: inherit; color: inherit; }
 }
 .tb-sep { width: 1px; height: 1.4rem; background: var(--line-strong); margin: 0 0.4rem; }
 
-#stage { position: relative; min-height: 0; overflow: hidden; }
-.tab-view { position: absolute; inset: 0; overflow: auto; display: none; }
-.tab-view.active { display: block; }
+#stage { position: relative; min-height: 0; overflow: hidden; height: 100%; }
+#views {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.tab-view {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: none;
+  background: transparent;
+  z-index: 1;
+}
+.tab-view.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.nt {
+  position: absolute;
+  inset: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.nt-hero {
+  position: relative;
+  z-index: 2;
+}
 .tab-view[data-view="category"],
 .tab-view[data-view="saved"],
 .tab-view[data-view="history"] {
@@ -5235,12 +5268,22 @@ function step(tab, delta) {
 
 function activateTab(id) {
   activeId = id;
-  tabs.forEach((t) => t.el.classList.toggle("active", t.id === id));
+  tabs.forEach((t) => {
+    const on = t.id === id;
+    t.el.classList.toggle("active", on);
+    if (on) {
+      t.el.style.display = "block";
+      // If new tab was wiped somehow, rebuild it
+      if (currentView(t).type === "newtab" && !t.el.querySelector(".nt")) {
+        try { buildNewTab(t); } catch (e) { console.error(e); }
+      }
+    } else {
+      t.el.style.display = "";
+    }
+  });
   renderSidebarTabs();
   updateChrome();
   if (typeof window.mzTabChanged === "function") window.mzTabChanged();
-  const t = activeTab();
-  if (t && currentView(t).type === "newtab") { /* keep focus wherever the user is */ }
 }
 
 function closeTab(id) {
@@ -5512,6 +5555,7 @@ function buildNewTab(tab) {
   const quick = $(".quick", el);
   QUICK_ROW.forEach((key) => {
     const c = CATEGORIES[key];
+    if (!c) return;
     const b = document.createElement("button");
     b.className = "q-btn";
     b.title = c.label;
@@ -9063,6 +9107,10 @@ function initApp() {
   ensureFirstVisitRecorded();
 
   createTab({ type: "newtab" });
+  try {
+    const t = activeTab();
+    if (t) activateTab(t.id);
+  } catch (e) { console.error(e); }
 
   loadGames();
   loadValidKeys();
@@ -9494,4 +9542,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const autoBtn = document.getElementById("proxyEngAuto");
   if (autoBtn) {
     autoBtn.addEventListener("click", () => {
-      try { localStorage.setItem("sbxProxyEngine", "auto"); } catch
+      try { localStorage.setItem("sbxProxyEngine", "auto"); } catch (e) {}
+      showToast("Automatic proxy routing");
+    });
+  }
+});
+
+</script>
+</body>
+</html>
