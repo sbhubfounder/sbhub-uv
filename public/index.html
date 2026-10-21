@@ -2243,20 +2243,274 @@ body {
   inset: 0;
   z-index: 2;
 }
-.chat-page { padding: 1.2rem; max-width: 44rem; margin: 0 auto; height: 100%; display: flex; flex-direction: column; min-height: 0; }
-.chat-lobby { display: flex; flex-direction: column; gap: 0.8rem; }
-.chat-note { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
-.chat-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--text-muted); }
-.chat-field input, .chat-code, .chat-input { padding: 0.6rem 0.8rem; border-radius: 0.6rem; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-main); }
-.chat-join-row { display: flex; gap: 0.5rem; }
-.chat-join-row .chat-code { flex: 1; text-transform: uppercase; letter-spacing: 0.12em; }
-.chat-room { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0.7rem; }
-.chat-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.chat-actions { display: flex; gap: 0.5rem; }
-.chat-online { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
-.chat-msgs { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; padding: 0.6rem; border: 1px solid var(--line); border-radius: 0.8rem; background: rgba(0, 0, 0, 0.25); }
-.chat-msg { line-height: 1.45; word-break: break-word; }
-.chat-sys { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+/* ---------- room chat (modern shell, matches site) ---------- */
+.chat-page {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.4rem 1.4rem;
+  background:
+    radial-gradient(90% 60% at 50% -10%, color-mix(in srgb, var(--accent-color) 18%, transparent), transparent 55%),
+    rgba(4, 8, 18, 0.35);
+  overflow: hidden;
+}
+.chat-lobby {
+  width: min(32rem, 100%);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  animation: chat-in 0.28s ease both;
+}
+@keyframes chat-in {
+  from { opacity: 0; transform: translateY(0.6rem); }
+  to { opacity: 1; transform: none; }
+}
+.chat-lobby-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+.chat-lobby-brand .chat-ico {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.85rem;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent-color) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
+  color: #fff;
+}
+.chat-lobby-brand .chat-ico .ico { width: 1.25rem; height: 1.25rem; }
+.chat-lobby-brand h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #fff;
+}
+.chat-lobby-brand p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.chat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.05rem 1.1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--surface-color) 78%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
+  box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.28);
+}
+.chat-card-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 0.1rem;
+}
+.chat-global {
+  width: 100%;
+  justify-content: center;
+  height: 2.9rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+}
+.chat-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+.chat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+}
+.chat-field input,
+.chat-code,
+.chat-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text-main);
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.chat-field input:focus,
+.chat-code:focus,
+.chat-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--accent-color) 28%, transparent);
+}
+.chat-join-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.chat-join-row .chat-code {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+.chat-join-row .chat-join {
+  flex: none;
+  padding: 0 1.1rem;
+  border-radius: 0.7rem;
+  font-weight: 600;
+}
+.chat-create {
+  width: 100%;
+  justify-content: center;
+  height: 2.7rem;
+  border-radius: 0.75rem;
+  font-weight: 650;
+}
+
+/* active room */
+.chat-room {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: min(42rem, 100%);
+  margin: 0 auto;
+  gap: 0.75rem;
+  animation: chat-in 0.22s ease both;
+}
+.chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--surface-color) 75%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(0.9rem);
+  -webkit-backdrop-filter: blur(0.9rem);
+}
+.chat-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.015em;
+}
+.chat-title b { font-weight: 800; color: #fff; }
+.chat-online {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.chat-online::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #3dd68c;
+  box-shadow: 0 0 0.4rem rgba(61, 214, 140, 0.55);
+  flex: none;
+}
+.chat-actions { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.chat-actions .btn {
+  height: 2.35rem;
+  padding: 0 0.9rem;
+  border-radius: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.chat-msgs {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(6, 10, 20, 0.55);
+  backdrop-filter: blur(0.6rem);
+  -webkit-backdrop-filter: blur(0.6rem);
+}
+.chat-msg {
+  line-height: 1.5;
+  word-break: break-word;
+  max-width: 92%;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.85rem 0.85rem 0.85rem 0.3rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+.chat-msg b {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--accent-color) 85%, #fff);
+  margin-bottom: 0.15rem;
+}
+.chat-sys {
+  align-self: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: normal;
+  padding: 0.3rem 0.7rem;
+  border-radius: 99rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+.chat-form {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.55rem;
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--surface-color) 80%, transparent);
+  border: 1px solid var(--line);
+}
+.chat-form .chat-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.65rem 0.75rem;
+}
+.chat-form .chat-input:focus { box-shadow: none; }
+.chat-form .btn.primary {
+  flex: none;
+  height: 2.5rem;
+  padding: 0 1.15rem;
+  border-radius: 0.7rem;
+  font-weight: 700;
+}
+@media (max-width: 720px) {
+  .chat-page { padding: 0.9rem 0.85rem 1rem; }
+  .chat-head { padding: 0.75rem 0.85rem; }
+  .chat-msgs { padding: 0.85rem; }
+}
+
 .chat-form { display: flex; gap: 0.5rem; }
 .chat-form .chat-input { flex: 1; }
 .tool-grid { grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
@@ -9197,13 +9451,29 @@ function renderChatPage() {
   if (!root || !chat.el.isConnected) return;
   if (!chat.room) {
     root.innerHTML = `<div class="chat-lobby">
-      <h2>Chat rooms</h2>
-      <button class="btn primary chat-global">Join global chat (everyone on SB HUB)</button>
-      <p class="chat-note">Or create a room and send the code to friends, or enter a code to join. Private rooms hold up to ${CHAT_MAX} people.</p>
-      <label class="chat-field">Your name<input class="chat-name" maxlength="24" value="${esc(store.get("sbxChatName") || "")}" placeholder="Guest"></label>
-      <button class="btn primary chat-create">Create room</button>
-      <div class="chat-join-row"><input class="chat-code" maxlength="10" placeholder="Room code" spellcheck="false" autocapitalize="characters"><button class="btn chat-join">Join</button></div>
-      <p class="chat-note">Chat messages go through a third-party relay (ntfy.sh) and aren't private: anyone with the room code can read them. Don't share passwords, personal information, or anything sensitive.</p>
+      <div class="chat-lobby-brand">
+        <div class="chat-ico">${ico("bubble")}</div>
+        <div>
+          <h2>Chat</h2>
+          <p>Talk with others on SB HUB</p>
+        </div>
+      </div>
+      <div class="chat-card">
+        <div class="chat-card-title">Everyone</div>
+        <button class="btn primary chat-global">Join global chat</button>
+        <p class="chat-note">Open room for anyone using SB HUB right now.</p>
+      </div>
+      <div class="chat-card">
+        <div class="chat-card-title">Your room</div>
+        <label class="chat-field">Display name<input class="chat-name" maxlength="24" value="${esc(store.get("sbxChatName") || "")}" placeholder="Guest"></label>
+        <button class="btn primary chat-create">Create private room</button>
+        <div class="chat-join-row">
+          <input class="chat-code" maxlength="10" placeholder="Room code" spellcheck="false" autocapitalize="characters" aria-label="Room code">
+          <button class="btn chat-join">Join</button>
+        </div>
+        <p class="chat-note">Private rooms hold up to ${CHAT_MAX} people. Share the code with friends.</p>
+      </div>
+      <p class="chat-note">Messages use a public relay and are not encrypted. Don’t share passwords or personal info.</p>
     </div>`;
     const nameIn = root.querySelector(".chat-name");
     root.querySelector(".chat-global").onclick = () => chatJoin(CHAT_GLOBAL, nameIn.value);
@@ -9216,21 +9486,22 @@ function renderChatPage() {
   root.innerHTML = `<div class="chat-room">
     <div class="chat-head">
       <div>
-        <div class="chat-title">${chatIsGlobal() ? "<b>Global chat</b>" : `Room <b>${esc(chat.code)}</b>`}</div>
+        <div class="chat-title">${chatIsGlobal() ? "Global chat" : `Room ${esc(chat.code)}`}</div>
         <div class="chat-online" id="chatOnline"></div>
       </div>
       <div class="chat-actions">
-        <button class="btn chat-copy">Copy code</button>
-        <button class="btn chat-leave">Leave</button>
+        ${chatIsGlobal() ? "" : `<button type="button" class="btn chat-copy">Copy code</button>`}
+        <button type="button" class="btn chat-leave">Leave</button>
       </div>
     </div>
     <div class="chat-msgs" role="log" aria-live="polite"></div>
     <form class="chat-form">
-      <input class="chat-input" maxlength="500" placeholder="Message" autocomplete="off" aria-label="Message">
+      <input class="chat-input" maxlength="500" placeholder="Write a message…" autocomplete="off" aria-label="Message">
       <button class="btn primary" type="submit">Send</button>
     </form>
   </div>`;
-  root.querySelector(".chat-copy").onclick = async () => {
+  const __chatCopy = root.querySelector(".chat-copy");
+  if (__chatCopy) __chatCopy.onclick = async () => {
     try { await navigator.clipboard.writeText(chat.code); showToast("Room code copied"); }
     catch { showToast("Room code: " + chat.code); }
   };
