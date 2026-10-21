@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loading</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #070c18; color: rgba(255,255,255,0.55);
+      font: 500 0.9rem system-ui, sans-serif; display: grid; place-items: center; text-align: center; }
+    .track { width: min(14rem, 55vw); height: 3px; border-radius: 99rem; background: rgba(255,255,255,0.12); overflow: hidden; margin: 0 auto 1rem; }
+    .bar { height: 100%; width: 40%; background: #fff; border-radius: inherit; animation: slide 1.05s ease-in-out infinite; }
+    @keyframes slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
+    #err { display: none; max-width: 28rem; padding: 1rem; color: #e8eefc; }
+    #err pre { text-align: left; background: #111827; padding: 0.75rem; border-radius: 0.5rem; overflow: auto; font-size: 0.75rem; color: #f87171; }
+    button, a { color: #9fc1ff; margin: 0.35rem; }
+    button { padding: 0.5rem 0.9rem; border: 1px solid #334155; border-radius: 0.5rem; background: #13213b; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="track"><div class="bar"></div></div>
+    <div id="m">Loading</div>
+  </div>
+  <div id="err">
+    <p>Couldn't open this site through the proxy.</p>
+    <pre id="d"></pre>
+    <button type="button" onclick="location.reload()">Retry</button>
+    <a id="direct" rel="noopener noreferrer" target="_blank">Open original</a>
+  </div>
+  <script>
+  (async function () {
+    const m = document.getElementById("m");
+    const params = new URLSearchParams(location.search);
+    const target = params.get("url");
+    const phase = Number(params.get("_p") || 0);
+    const timeout = (p, ms, name) => Promise.race([
+      p,
+      new Promise((_, rej) => setTimeout(() => rej(new Error((name || "step") + " timed out")), ms))
+    ]);
+    function fail(err) {
+      document.getElementById("boot").style.display = "none";
+      document.getElementById("err").style.display = "block";
+      document.getElementById("d").textContent = err && err.message ? err.message : String(err);
+    }
+    function loadScript(src) {
+      return timeout(new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error("Failed to load " + src));
+        document.head.appendChild(s);
+      }), 15000, src);
+    }
+    if (!target || !/^https?:\/\//i.test(target)) return fail(new Error("Missing URL"));
+    document.getElementById("direct").href = target;
+    if (!window.isSecureContext || !("serviceWorker" in navigator)) {
+      return fail(new Error("Needs HTTPS and service workers"));
+    }
+    try {
+      m.textContent = "Preparing";
+      await loadScript("/baremux/index.js");
+      await loadScript("/uv/uv.bundle.js");
+      await loadScript("/uv/uv.config.js");
+      if (!window.BareMux || !self.__uv$config) throw new Error("Proxy scripts missing");
+
+      // Clear broken SW / MessagePort state on first phases
+      if (phase === 0) {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+          if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+        } catch (e) {}
+      }
+
+      m.textContent = "Starting";
+      const reg = await timeout(navigator.serviceWorker.register("/sw.js", { scope: "/" }), 20000, "SW register");
+      await timeout(navigator.serviceWorker.ready, 20000, "SW ready");
+      try {
+        if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        if (reg.active) reg.active.postMessage({ type: "claim" });
+      } catch (e) {}
+
+      if (!navigator.serviceWorker.controller) {
+        await Promise.race([
+          new Promise((r) => navigator.serviceWorker.addEventListener("controllerchange", r, { once: true })),
+          new Promise((r) => setTimeout(r, 2000)),
+        ]);
+      }
+      if (!navigator.serviceWorker.controller) {
+        if (phase >= 3) throw new Error("Service worker never took control. Clear site data for this proxy host and retry.");
+        const u = new URL(location.href);
+        u.searchParams.set("_p", String(phase + 1));
+        location.replace(u.href);
+        return;
+      }
+
+      m.textContent = "Connecting";
+      const wisp = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/wisp/";
+      const conn = new window.BareMux.BareMuxConnection("/baremux/worker.js");
+      let transportOk = false;
+      const transports = [
+        ["/epoxy/index.mjs", [{ wisp }]],
+        ["/libcurl/index.mjs", [{ wisp }]],
+      ];
+      let lastErr = null;
+      for (const [path, opts] of transports) {
+        try {
+          await timeout(conn.setTransport(path, opts), 12000, path);
+          transportOk = true;
+          break;
+        } catch (e) {
+          lastErr = e;
+          console.warn("transport failed", path, e);
+        }
+      }
+      if (!transportOk) throw lastErr || new Error("All clients returned an invalid MessagePort");
+
+      await new Promise((r) => setTimeout(r, 150));
+      m.textContent = "Opening";
+      const prefix = self.__uv$config.prefix || "/uv/service/";
+      location.replace(prefix + self.__uv$config.encodeUrl(target));
+    } catch (e) {
+      console.error(e);
+      fail(e);
+    }
+  })();
+  </script>
+</body>
+</html>
