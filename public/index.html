@@ -6297,16 +6297,24 @@ function mzBindAudio() {
 
 function mzYtApi() {
   if (window.YT && window.YT.Player) return Promise.resolve();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => { if (typeof prev === "function") prev(); resolve(); };
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      if (window.YT && window.YT.Player) resolve();
+      else reject(new Error("YouTube API unavailable"));
+    };
+    window.onYouTubeIframeAPIReady = () => { try { if (typeof prev === "function") prev(); } catch (e) {} done(); };
     if (!document.getElementById("ytIframeApi")) {
       const s = document.createElement("script");
       s.id = "ytIframeApi";
       s.src = "https://www.youtube.com/iframe_api";
+      s.onerror = () => reject(new Error("YouTube API blocked"));
       document.head.appendChild(s);
     }
-    setTimeout(resolve, 10000);
+    setTimeout(done, 12000);
   });
 }
 
@@ -6435,7 +6443,7 @@ function mzSearchAny(q) {
     ];
     jobs.forEach((j) => j.then((id) => { if (mzValidId(id)) { finish(id); ctrl.abort(); } }, () => {}));
     Promise.allSettled(jobs).then(() => finish(null));
-    setTimeout(() => { finish(null); ctrl.abort(); }, 6000);
+    setTimeout(() => { finish(null); ctrl.abort(); }, 10000);
   });
 }
 async function mzFindId(t) {
@@ -6459,6 +6467,34 @@ async function mzIdFor(t) {
 }
 
 /* ---------- playback ---------- */
+
+/** Hidden youtube-nocookie embed — works when the IFrame API is blocked. */
+function mzPlayViaEmbed(id) {
+  const host = document.getElementById("musicGlobalYtHost");
+  if (!host) throw new Error("Music host missing");
+  host.innerHTML = "";
+  const frame = document.createElement("iframe");
+  frame.id = "mzEmbedAudio";
+  frame.allow = "autoplay; encrypted-media; picture-in-picture";
+  frame.setAttribute("allowfullscreen", "");
+  frame.referrerPolicy = "strict-origin-when-cross-origin";
+  frame.style.cssText = "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;bottom:0;border:0";
+  const origin = /^https?:$/.test(location.protocol) ? encodeURIComponent(location.origin) : "";
+  frame.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id)
+    + "?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+    + (origin ? "&origin=" + origin : "");
+  host.appendChild(frame);
+  MZ.source = "yt";
+  MZ.yt = null; // API player not available
+  MZ.playing = true;
+  MZ.loading = false;
+  MZ.time = 0;
+  // unknown duration until API works — keep 0 and let UI show --:--
+  mzTickStop();
+  mzPublish("all");
+}
+
+
 
 function mzStopAll() {
   try { mzAudio().pause(); } catch (e) { /* */ }
@@ -6539,13 +6575,35 @@ async function mzPlay(track, list, index) {
     MZ.source = "yt";
     yt.setVolume(Math.round(MZ.volume * 100));
     yt.loadVideoById(id);
+    try { yt.playVideo(); } catch (e2) { /* autoplay may need gesture */ }
     MZ.loading = false;
     MZ.playing = true;
     mzTickStart();
     mzPublish("all");
   } catch (e) {
-    console.warn(e);
-    if (token === MZ.token) mzFail("The music player couldn't start. Try again.");
+    console.warn("YT API failed, trying embed", e);
+    if (token !== MZ.token) return;
+    try {
+      mzPlayViaEmbed(id);
+      showToast("Playing (embed mode)");
+    } catch (e2) {
+      console.warn(e2);
+      // Last resort: iTunes/preview clip
+      if (track.preview) {
+        MZ.source = "local";
+        const a = mzAudio();
+        a.src = track.preview;
+        a.volume = MZ.volume;
+        try {
+          await a.play();
+          MZ.loading = false; MZ.playing = true; mzTickStart();
+          showToast("Full track blocked — playing preview");
+          mzPublish("all");
+          return;
+        } catch (e3) { /* */ }
+      }
+      if (token === MZ.token) mzFail("Couldn't start playback. Try another track or check network blocks.");
+    }
   }
 }
 
@@ -6585,6 +6643,17 @@ function mzTogglePlay() {
     } else if (MZ.source === "yt" && MZ.yt) {
       if (MZ.yt.getPlayerState() === YT.PlayerState.PLAYING) MZ.yt.pauseVideo();
       else MZ.yt.playVideo();
+    } else if (MZ.source === "yt" && !MZ.yt) {
+      // embed mode — restart track
+      if (MZ.playing) {
+        const host = document.getElementById("musicGlobalYtHost");
+        if (host) host.innerHTML = "";
+        MZ.playing = false;
+        mzTickStop();
+      } else if (MZ.current && mzValidId(MZ.current.videoId)) {
+        mzPlayViaEmbed(MZ.current.videoId);
+        return;
+      }
     } else if (MZ.source === "uv") {
       if (MZ.playing) {
         const frame = document.getElementById("mzUvAudioFrame");
@@ -6834,6 +6903,8 @@ function mzRow(t, list, i, opts = {}) {
 }
 
 function buildMusicPage(tab) {
+  try { mzYtApi().catch(() => {}); } catch (e) {}
+
   const el = tab.el;
   el.dataset.mz = "1";
   el.innerHTML = `
