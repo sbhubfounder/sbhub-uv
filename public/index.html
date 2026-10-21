@@ -3735,11 +3735,14 @@ const PROXY_PREFIX = "/uv/service/";
 const DEFAULT_PROXY_ORIGIN = "https://sbhubproxtest.onrender.com";
 // One-time reset so an old saved proxy address from earlier builds can't override the default.
 try {
-  if (localStorage.getItem("sbxProxyOriginV") !== "4") {
+  // v5: always use known-good UV host; wipe stale overrides that break the proxy
+  if (localStorage.getItem("sbxProxyOriginV") !== "5") {
     localStorage.removeItem("sbxProxyOrigin");
     localStorage.removeItem("sbxProxyMode");
-    localStorage.removeItem("sbxAiOrigin");
-    localStorage.setItem("sbxProxyOriginV", "4");
+    localStorage.removeItem("sbxProxyEngine");
+    localStorage.setItem("sbxProxyOrigin", "https://sbhubproxtest.onrender.com");
+    localStorage.setItem("sbxProxyEngine", "auto");
+    localStorage.setItem("sbxProxyOriginV", "5");
   }
 } catch (e) { /* */ }
 let resolvedProxyMode = null; // "local" | "remote"
@@ -3756,8 +3759,9 @@ function isLocalFilePage() {
 function getProxyOrigin() {
   try {
     const saved = (localStorage.getItem("sbxProxyOrigin") || "").trim().replace(/\/$/, "");
-    if (saved && /^https?:\/\//i.test(saved)) return saved;
-  } catch { /* */ }
+    // Ignore broken/empty saves; only accept https origins
+    if (saved && /^https:\/\//i.test(saved)) return saved;
+  } catch (e) {}
   return DEFAULT_PROXY_ORIGIN.replace(/\/$/, "");
 }
 
@@ -4312,14 +4316,8 @@ function openProxied(url) {
     return false;
   }
   try { localStorage.setItem("sbxProxyEngine", "auto"); } catch (e) {}
-  // Local file pages cannot run a service worker. Still open a web tab whose
-  // iframe points at the remote UV host (https://…/proxy-boot.html?url=…).
-  if (isLocalFilePage()) {
-    try { warmProxyHost(); } catch (e) {}
-    go({ type: "web", url });
-    return true;
-  }
   try { warmProxyHost(); } catch (e) {}
+  // Prefer in-app tab; iframe loads remote proxy-boot (no sandbox)
   go({ type: "web", url });
   return true;
 }
@@ -4327,62 +4325,64 @@ function openProxied(url) {
 /* Renders a proxied page inside the browser's own tab area (address bar and tabs stay visible). */
 function buildWebView(tab, url) {
   const label = hostOf(url) || "page";
-  const local = isLocalFilePage();
-  // Absolute remote boot URL — works from file:// and from any domain
+  const local = (typeof isLocalFilePage === "function" && isLocalFilePage());
+  // Verified live: https://sbhubproxtest.onrender.com/proxy-boot.html?url=…
   const bootSrc = buildProxyBootUrl(url);
   tab.el.innerHTML = `
     <div class="web-view">
       <div class="game-load-status" role="status">
         <span>Loading ${esc(label)}…</span>
-        ${local ? `<button type="button" class="btn web-open-hosted" style="margin-top:0.75rem">Open in hosted SB HUB</button>` : ""}
+        <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center">
+          <button type="button" class="btn web-retry" hidden>Retry</button>
+          <button type="button" class="btn web-open-tab">Open in new tab</button>
+        </div>
       </div>
       <iframe class="web-frame" title="${esc(label)}"
         allow="autoplay; fullscreen; clipboard-read; clipboard-write; encrypted-media"
-        allowfullscreen
-        referrerpolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-downloads"></iframe>
+        allowfullscreen></iframe>
     </div>`;
   const frame = $(".web-frame", tab.el);
   const status = $(".game-load-status", tab.el);
-  const openHosted = $(".web-open-hosted", tab.el);
-  if (openHosted) {
-    openHosted.onclick = () => {
-      const live = (typeof SB_HUB_LIVE_URL === "string" ? SB_HUB_LIVE_URL : "https://sbhubproxtest.onrender.com").replace(/\/$/, "");
-      window.open(live + "/?go=" + encodeURIComponent(url), "_blank", "noopener,noreferrer");
-    };
-  }
+  const retryBtn = $(".web-retry", tab.el);
+  const openTab = $(".web-open-tab", tab.el);
+  if (openTab) openTab.onclick = () => window.open(bootSrc, "_blank", "noopener,noreferrer");
 
-  // Set src immediately — do not wait on SW/local UV (broken on file://)
   let settled = false;
-  frame.onload = () => {
-    if (settled) return;
-    try {
-      const href = frame.contentWindow && frame.contentWindow.location && frame.contentWindow.location.href;
-      if (href && /proxy-boot\.html/i.test(href)) return; // still booting
-    } catch (e) {
+  const start = () => {
+    settled = false;
+    if (retryBtn) retryBtn.hidden = true;
+    if (status) {
+      status.hidden = false;
+      const span = status.querySelector("span");
+      if (span) span.textContent = "Loading " + label + "…";
+    }
+    frame.onload = () => {
+      // UV pages are cross-origin → access throws → treat as loaded
+      try {
+        const href = frame.contentWindow && frame.contentWindow.location && String(frame.contentWindow.location.href || "");
+        if (/proxy-boot\.html/i.test(href)) return;
+      } catch (e) {
+        settled = true;
+        if (status) status.hidden = true;
+        return;
+      }
       settled = true;
       if (status) status.hidden = true;
-      return;
-    }
-    settled = true;
-    if (status) status.hidden = true;
+    };
+    frame.src = bootSrc;
   };
-  frame.onerror = () => {
-    if (status) {
-      const span = status.querySelector("span");
-      if (span) span.textContent = "Couldn't load " + label + (local ? " — try Open in hosted SB HUB" : "");
-    }
-  };
-  frame.src = bootSrc;
-  // Wake proxy in background (ignore failures on file://)
+  if (retryBtn) retryBtn.onclick = () => { try { frame.src = "about:blank"; } catch (e) {} setTimeout(start, 80); };
+  start();
   try { warmProxyHost(); } catch (e) {}
   setTimeout(() => {
-    if (!settled && status) {
+    if (!settled && status && !status.hidden) {
       const span = status.querySelector("span");
-      if (span && local) span.textContent = "Still loading… If this stays blank, use Open in hosted SB HUB (file:// can't run the proxy itself).";
+      if (span) span.textContent = local
+        ? "Local file mode is limited. Use Open in new tab."
+        : "Still loading… Try Retry or Open in new tab.";
+      if (retryBtn) retryBtn.hidden = false;
     }
   }, 10000);
-  setTimeout(() => { if (!settled && status) status.hidden = true; }, 25000);
 }
 
 
@@ -9488,18 +9488,10 @@ function showDomainWarning() {
   wrap.querySelector("#domainWarningOk").onclick = () => wrap.remove();
 }
 
-try { localStorage.setItem("sbxProxyEngine", "auto"); localStorage.setItem("sbxProxyOriginV", "4"); } catch (e) {}
+try { localStorage.setItem("sbxProxyEngine", "auto"); localStorage.setItem("sbxProxyOrigin", "https://sbhubproxtest.onrender.com"); localStorage.setItem("sbxProxyOriginV", "5"); } catch (e) {}
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
   const autoBtn = document.getElementById("proxyEngAuto");
   if (autoBtn) {
     autoBtn.addEventListener("click", () => {
-      try { localStorage.setItem("sbxProxyEngine", "auto"); } catch (e) {}
-      showToast("Automatic proxy routing");
-    });
-  }
-});
-
-</script>
-</body>
-</html>
+      try { localStorage.setItem("sbxProxyEngine", "auto"); } catch
