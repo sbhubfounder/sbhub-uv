@@ -2220,9 +2220,29 @@ body {
   }
 }
 
-  .web-view { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.web-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #0a0e16; }
-.web-view .game-load-status { z-index: 2; }
+.web-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #0a0e16;
+}
+.web-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: #0a0e16;
+}
+.web-view .game-load-status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
 .chat-page { padding: 1.2rem; max-width: 44rem; margin: 0 auto; height: 100%; display: flex; flex-direction: column; min-height: 0; }
 .chat-lobby { display: flex; flex-direction: column; gap: 0.8rem; }
 .chat-note { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
@@ -4266,19 +4286,30 @@ function isBlockedContent(url) {
 }
 
 function openProxied(url) {
-  if (isBlockedContent(url)) {
-    showToast("This site is blocked on SB HUB.");
-    return false;
-  }
-  try { warmProxyHost(); } catch (e) {}
-  go({ type: "web", url });
+  if (!url) return false;
+  try {
+    if (typeof isBlockedContent === "function" && isBlockedContent(url)) {
+      showToast("This site is blocked on SB HUB.");
+      return false;
+    }
+  } catch (e) {}
+  try {
+    if (!/^https?:\/\//i.test(url)) url = "https://" + String(url).replace(/^\/\/+/, "");
+  } catch (e) {}
+  try { if (typeof warmProxyHost === "function") warmProxyHost(); } catch (e) {}
+  go({ type: "web", url: url });
   return true;
 }
 
 /* Renders a proxied page inside the browser's own tab area (address bar and tabs stay visible). */
 function buildWebView(tab, url) {
   const label = hostOf(url) || "page";
-  const bootSrc = buildProxyBootUrl(url);
+  const bootSrc = (typeof buildProxyBootUrl === "function")
+    ? buildProxyBootUrl(url)
+    : ("https://sbhubproxtest.onrender.com/proxy-boot.html?url=" + encodeURIComponent(url));
+  tab.el.style.position = "absolute";
+  tab.el.style.inset = "0";
+  tab.el.style.overflow = "hidden";
   tab.el.innerHTML = `
     <div class="web-view">
       <div class="game-load-status" role="status">
@@ -4297,8 +4328,10 @@ function buildWebView(tab, url) {
   const retryBtn = $(".web-retry", tab.el);
   const openTab = $(".web-open-tab", tab.el);
   if (openTab) openTab.onclick = () => window.open(bootSrc, "_blank", "noopener,noreferrer");
+
   let settled = false;
-  const start = () => {
+  const hideStatus = () => { if (status) status.hidden = true; };
+  const start = async () => {
     settled = false;
     if (retryBtn) retryBtn.hidden = true;
     if (status) {
@@ -4306,30 +4339,37 @@ function buildWebView(tab, url) {
       const span = status.querySelector("span");
       if (span) span.textContent = "Loading " + label + "…";
     }
+    // Old reliable sequence: wake proxy host, then set iframe to proxy-boot
+    try { if (typeof warmProxyHost === "function") await warmProxyHost(); } catch (e) {}
     frame.onload = () => {
+      // Cross-origin UV page → access throws → success (same as when proxy worked)
       try {
         const href = frame.contentWindow && frame.contentWindow.location && String(frame.contentWindow.location.href || "");
-        if (/proxy-boot\.html/i.test(href)) return;
+        if (/proxy-boot\.html/i.test(href)) return; // still booting
       } catch (e) {
         settled = true;
-        if (status) status.hidden = true;
+        hideStatus();
         return;
       }
       settled = true;
-      if (status) status.hidden = true;
+      hideStatus();
     };
-    frame.src = bootSrc;
+    // Cache-bust so a stuck boot can recover
+    const src = bootSrc.replace(/([?&])_=[^&]*/, "$1_=" + Date.now());
+    frame.src = src.indexOf("_=") >= 0 ? src : (bootSrc + (bootSrc.includes("?") ? "&" : "?") + "_=" + Date.now());
   };
-  if (retryBtn) retryBtn.onclick = () => { try { frame.src = "about:blank"; } catch (e) {} setTimeout(start, 80); };
+  if (retryBtn) retryBtn.onclick = () => {
+    try { frame.removeAttribute("src"); } catch (e) {}
+    setTimeout(start, 100);
+  };
   start();
-  try { warmProxyHost(); } catch (e) {}
   setTimeout(() => {
     if (!settled && status && !status.hidden) {
       const span = status.querySelector("span");
       if (span) span.textContent = "Still loading… Try Retry or Open in new tab.";
       if (retryBtn) retryBtn.hidden = false;
     }
-  }, 12000);
+  }, 10000);
 }
 
 
