@@ -3744,7 +3744,7 @@ const PROXY_PREFIX = "/uv/service/";
  * Any other domain (sbx.life, mirrors) loads proxy pages through this origin.
  * Override: localStorage.setItem("sbxProxyOrigin", "https://your-proxy.onrender.com")
  */
-const DEFAULT_PROXY_ORIGIN = "https://sbhubproxtest.onrender.com";
+const DEFAULT_PROXY_ORIGIN = "https://sbhub-uv-2.onrender.com";
 // One-time reset so an old saved proxy address from earlier builds can't override the default.
 try {
   if (localStorage.getItem("sbxProxyOriginV") !== "4") {
@@ -8345,30 +8345,17 @@ function buildGameView(tab, game) {
     status.hidden = false;
     status.textContent = "Loading " + game.name + " through Ultraviolet…";
     frame.onload = () => {
-      if (finished || !frame.isConnected) return;
-      try {
-        const current = new URL(frame.contentWindow.location.href);
-        if (current.pathname.endsWith("/proxy-boot.html")) return;
-        if (current.origin === new URL(getProxyOrigin()).origin &&
-            current.pathname.startsWith(PROXY_PREFIX)) {
-          finished = true;
-          clearTimeout(loadTimeout);
-          status.hidden = true;
-          addRecent(game);
-          incrementGamesPlayed();
-          bumpPlayCount(game.name);
-          showToast("Playing " + game.name + " through UV");
-          return;
-        }
-        if (current.origin !== new URL(getProxyOrigin()).origin) {
-          finished = true;
-          clearTimeout(loadTimeout);
-          status.hidden = true;
-        }
-      } catch {
-        // Leave the proxy iframe in place; show a retry option if setup times out.
-      }
-    };
+    if (!frame.isConnected) return;
+    // The proxy boot host is cross-origin from a site that embeds this HTML, so
+    // inspecting frame.contentWindow.location is forbidden. Treat a successful
+    // iframe load as progress and let the proxy's own boot page report setup errors.
+    finished = true;
+    clearTimeout(loadTimeout);
+    status.hidden = true;
+    addRecent(game);
+    incrementGamesPlayed();
+    bumpPlayCount(game.name);
+  };
 
     loadTimeout = setTimeout(() => {
       if (!finished && status.isConnected) {
