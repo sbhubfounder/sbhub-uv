@@ -8289,8 +8289,8 @@ function buildGameView(tab, game) {
           <button class="icon-btn gb-close" title="Close game" aria-label="Close game">${ico("x")}</button>
         </div>
       </div>
-      <div class="game-load-status" role="status">Loading ${esc(game.name)} from the game repository…</div>
-      <iframe class="game-frame" allow="autoplay; fullscreen; gamepad; pointer-lock; clipboard-read; clipboard-write" allowfullscreen title="${esc(game.name)}"></iframe>
+      <div class="game-load-status" role="status">Preparing the UV proxy for ${esc(game.name)}…</div>
+      <iframe class="game-frame" allow="autoplay; fullscreen; gamepad; pointer-lock; clipboard-read; clipboard-write; encrypted-media" allowfullscreen title="${esc(game.name)}"></iframe>
     </div>`;
   const frame = $(".game-frame", tab.el);
   const status = $(".game-load-status", tab.el);
@@ -8298,10 +8298,11 @@ function buildGameView(tab, game) {
   $(".vol", tab.el).addEventListener("input", (e) => showToast("Volume: " + e.target.value + "% (Requires game support)"));
   $(".gb-newtab", tab.el).onclick = () => openGameInBrowserTab(game);
   $(".gb-full", tab.el).onclick = () => (frame.requestFullscreen ? frame.requestFullscreen() : showToast("Fullscreen not supported by browser."));
-  $(".gb-reload", tab.el).onclick = () => { showToast("Refreshing..."); renderView(tab); };
+  $(".gb-reload", tab.el).onclick = () => renderView(tab);
   $(".gb-close", tab.el).onclick = () => (tab.i > 0 ? step(tab, -1) : closeTab(tab.id));
 
   let loadTimeout;
+  let finished = false;
   const showError = (message) => {
     if (!status.isConnected) return;
     status.replaceChildren(document.createTextNode(message));
@@ -8312,34 +8313,72 @@ function buildGameView(tab, game) {
     status.appendChild(retry);
     const open = document.createElement("button");
     open.className = "btn sm";
-    open.textContent = "Open in a new browser tab";
+    open.textContent = "Open proxied game in a new tab";
     open.onclick = () => openGameInBrowserTab(game);
     status.appendChild(open);
     status.hidden = false;
   };
 
-  fetchGameHtml(game).then((html) => {
-    if (!frame.isConnected) return;
-    status.textContent = `Starting ${game.name}…`;
-    frame.addEventListener("load", () => {
-      clearTimeout(loadTimeout);
-      status.hidden = true;
-      addRecent(game);
-      incrementGamesPlayed();
-      bumpPlayCount(game.name);
-      showToast(`Playing ${game.name}`);
-    }, { once: true });
+  const start = () => {
+    let target;
+    try { target = new URL(game.url); }
+    catch { showError("This game has an invalid URL."); return; }
+    if (target.protocol !== "https:" && target.protocol !== "http:") {
+      showError("This game needs an HTTP or HTTPS URL.");
+      return;
+    }
+
+    // Always boot Ultraviolet on the dedicated proxy origin. Do not download game HTML
+    // into srcdoc: that bypasses UV for scripts, stylesheets, images, and game requests.
+    let proxiedBoot;
+    try {
+      proxiedBoot = buildProxyBootUrl(target.href);
+      const bootUrl = new URL(proxiedBoot);
+      if (bootUrl.origin !== new URL(getProxyOrigin()).origin) {
+        throw new Error("Proxy boot URL does not match the configured proxy host.");
+      }
+    } catch (error) {
+      showError("Couldn't prepare the UV proxy: " + (error.message || "invalid proxy URL"));
+      return;
+    }
+
+    status.hidden = false;
+    status.textContent = "Loading " + game.name + " through Ultraviolet…";
+    frame.onload = () => {
+      if (finished || !frame.isConnected) return;
+      try {
+        const current = new URL(frame.contentWindow.location.href);
+        if (current.pathname.endsWith("/proxy-boot.html")) return;
+        if (current.origin === new URL(getProxyOrigin()).origin &&
+            current.pathname.startsWith(PROXY_PREFIX)) {
+          finished = true;
+          clearTimeout(loadTimeout);
+          status.hidden = true;
+          addRecent(game);
+          incrementGamesPlayed();
+          bumpPlayCount(game.name);
+          showToast("Playing " + game.name + " through UV");
+          return;
+        }
+        if (current.origin !== new URL(getProxyOrigin()).origin) {
+          finished = true;
+          clearTimeout(loadTimeout);
+          status.hidden = true;
+        }
+      } catch {
+        // Leave the proxy iframe in place; show a retry option if setup times out.
+      }
+    };
+
     loadTimeout = setTimeout(() => {
-      showError(`${game.name} is taking too long to start. Retry the download or open it in a new browser tab.`);
-    }, 45000);
-    // Render downloaded game HTML in an opaque-origin sandbox. Do not grant
-    // allow-same-origin: repository HTML must not gain access to SB HUB storage/DOM.
-    frame.srcdoc = html;
-  }).catch((error) => {
-    console.error(`Failed to load ${game.name} from the game repository:`, error);
-    showError(`Couldn't load ${game.name}: ${error.message || "repository request failed"}`);
-    showToast(`Couldn't load ${game.name}.`);
-  });
+      if (!finished && status.isConnected) {
+        showError(game.name + " is taking too long to start through the proxy. Retry, or check that the UV server is online.");
+      }
+    }, 60000);
+    frame.src = proxiedBoot;
+  };
+
+  start();
   tab.cleanup = () => clearTimeout(loadTimeout);
 }
 
