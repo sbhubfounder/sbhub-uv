@@ -5592,12 +5592,37 @@ function buildGameCard(g) {
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", g.name);
-  const thumbSrc = g.thumb && g.thumb.trim() ? g.thumb : "https://via.placeholder.com/200x100/0a0a0a/5865F2?text=" + encodeURIComponent(g.name);
+  const placeholder = "https://placehold.co/400x220/0a0a0a/8aa4d8?text=" + encodeURIComponent(g.name || "Game");
+  const direct = typeof g.thumb === "string" ? g.thumb.trim() : "";
+  const img = document.createElement("img");
+  img.alt = g.name || "Game";
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+  img.src = direct || placeholder;
+  img.onerror = async function () {
+    if (!this.dataset.searchTried) {
+      this.dataset.searchTried = "1";
+      try {
+        // The Google Programmable Search key stays on the server, never in this HTML.
+        const endpoint = "https://sbhubproxtest.onrender.com/api/game-image?name=" + encodeURIComponent(g.name || "video game");
+        const response = await fetch(endpoint, { cache: "no-store" });
+        const data = response.ok ? await response.json() : null;
+        if (data && typeof data.imageUrl === "string" && /^https:\/\//i.test(data.imageUrl)) {
+          this.src = data.imageUrl;
+          return;
+        }
+      } catch (error) {
+        console.warn("Game image fallback unavailable:", error);
+      }
+    }
+    this.onerror = null;
+    this.src = placeholder;
+  };
   card.innerHTML = `
     <div class="tag">${esc(g.tag || "GAME")}</div>
     <div class="fav-star ${isFavorite(g.name) ? "active" : ""}" title="Toggle favorite" role="button" aria-label="Toggle favorite">★</div>
-    <div class="thumb"><img src="${esc(thumbSrc)}" alt="${esc(g.name)}" loading="lazy"><div class="cap">${esc(g.name)}</div></div>`;
-  $("img", card).onerror = function () { this.onerror = null; this.src = "https://via.placeholder.com/200x100/0a0a0a/5865F2?text=Error"; };
+    <div class="thumb"><div class="cap">${esc(g.name)}</div></div>`;
+  $(".thumb", card).prepend(img);
   $(".fav-star", card).onclick = (e) => { e.stopPropagation(); toggleFavorite(g.name); };
   card.onclick = () => openGame(g);
   card.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openGame(g); } };
@@ -8324,9 +8349,8 @@ async function openGameInBrowserTab(game) {
   let url;
   try { url = new URL(game.url); } catch { showToast("This game has an invalid URL."); return; }
   if (url.protocol !== "https:") { showToast("Games must use HTTPS."); return; }
-  // Navigate directly to the game's own origin instead of writing remote HTML
-  // into an about:blank tab that inherits SB HUB's origin.
-  openExternal(url.href);
+  // Keep the game inside the SB HUB tab area and route it through Ultraviolet.
+  go({ type: "web", url: url.href });
 }
 
 /* ==========================================================================
